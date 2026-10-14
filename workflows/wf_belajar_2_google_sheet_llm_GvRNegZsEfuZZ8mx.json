@@ -1,0 +1,294 @@
+{
+  "id": "GvRNegZsEfuZZ8mx",
+  "name": "WF Belajar 2 Google Sheet + LLM",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-07T08:33:15.726Z",
+  "updatedAt": "2026-10-08T02:40:07.797Z",
+  "isArchived": false,
+  "versionId": "e78df42c-f001-4060-b7f2-39274192522a",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Test Form",
+        "formDescription": "Test Form Deskripsi",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Pesan"
+            },
+            {
+              "fieldLabel": "Tanggal",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        32
+      ],
+      "id": "19be598e-7c47-45ff-9976-13e5beee37db",
+      "name": "On form submission",
+      "webhookId": "c15835dc-d3b6-451a-9467-73fa4f32f31f"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10aa6f7a-c220-4f8e-990a-4ab6fe6ba123",
+              "name": "name",
+              "value": "={{ $('On form submission').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "a184f861-5549-40b0-9858-b4e8c8ea431a",
+              "name": "email",
+              "value": "={{ $(\"On form submission\").item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "7b5c3f64-d082-4482-9b07-25943e9f82cc",
+              "name": "pesan",
+              "value": "={{ $(\"On form submission\").item.json.Pesan }}",
+              "type": "string"
+            },
+            {
+              "id": "cd89b48f-099b-4da4-84b6-efe1cfe3adac",
+              "name": "=sentimen",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3de85cdd-940d-4eea-86ec-f1d306499a76",
+              "name": "tanggal",
+              "value": "=tanggal, Value: {{ $now.format(\"yyyy-MM-dd HH:mm\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        464,
+        32
+      ],
+      "id": "8f7df762-e5e9-4188-bdc1-e7355ea88e9d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1p7ztd0mffzlYq9VojwCFZPa-tqQTkV0m2ygOMjuRte0/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p7ztd0mffzlYq9VojwCFZPa-tqQTkV0m2ygOMjuRte0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nama": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Pesan": "={{ $json.pesan }}",
+            "Tanggal": "={{ $json.Tanggal }}",
+            "Sentimen": "={{ $json.sentiment }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nama",
+              "displayName": "Nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pesan",
+              "displayName": "Pesan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sentimen",
+              "displayName": "Sentimen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tanggal",
+              "displayName": "Tanggal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        176
+      ],
+      "id": "74f9d0a6-eea7-4f6a-9f06-881fcc0b626e",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analisis sentimen dari pesan berikut dan jawab HANYA\ndengan satu kata: \"Positif\", \"Negatif\", atau \"Netral\".\n\nPesan {{ $json.Pesan }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        48,
+        32
+      ],
+      "id": "5fa2d0e0-e558-415d-b611-2cc149c01a20",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        272
+      ],
+      "id": "b360e602-8113-4960-8759-e731f2f3e80f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "GvRNegZsEfuZZ8mx",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-07T08:33:15.726Z",
+      "updatedAt": "2026-10-07T08:33:15.726Z"
+    }
+  ],
+  "activeVersion": null
+}
