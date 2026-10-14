@@ -1,0 +1,662 @@
+{
+  "id": "t6MISTFXgrzWlVwT",
+  "name": "Study Case Speaking Partner & CRM",
+  "active": true,
+  "activeVersionId": "8cdbfd28-36f0-4d3f-bee7-f9280e4bf1db",
+  "createdAt": "2026-10-08T07:24:57.639Z",
+  "updatedAt": "2026-10-08T08:48:36.574Z",
+  "isArchived": false,
+  "versionId": "f9f12bdb-f60d-4c7c-b50f-b6caf4e45f0e",
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Speaking Partner Talk Notes",
+        "formDescription": "Simpan catatan ngobrol dan kontak partner dalam 5 detik",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Topics",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Person"
+            },
+            {
+              "fieldLabel": "Country"
+            },
+            {
+              "fieldLabel": "Gender",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Men"
+                  },
+                  {
+                    "option": "Female"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Feedback / Chit-chat Notes",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Social Media / WhatsApp (Jika Ada)"
+            },
+            {
+              "fieldLabel": "Want to meet again?",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "👍 I'd love to!"
+                  },
+                  {
+                    "option": "😐 It's okay"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "respondWith": "redirect",
+              "redirectUrl": "http://localhost:5678/form/83feac62-cc53-4235-ad3b-bc7b591c5725"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "e8227c3d-ed76-475a-a1ba-0f843baf2cf3",
+      "name": "On form submission",
+      "webhookId": "83feac62-cc53-4235-ad3b-bc7b591c5725"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah asisten penerjemah dan pengolah data.\nBerikut data partner ngobrol bahasa Inggris:\n- Nama: \"{{ $json.Person }}\"\n- Gender : {{ $json.Gender }}\n- Negara: \"{{ $json.Country }}\"\n- Topik Obrolan (English): \"{{ $json.Topics }}\"\n- Chit Chat : \"{{ $json['Feedback / Chit-chat Notes'] }}\"\n- Kontak: \"{{ $json['Social Media / WhatsApp (Jika Ada)'] }}\"\n\nTugasmu:\n1. Terjemahkan teks 'Topik Obrolan' ke dalam Bahasa Indonesia yang natural dan mudah dipahami.\n2. Standarisasi nama negara ke bahasa Inggris baku (misal \"Columbia\" -> \"Colombia\", \"Srilangka\" -> \"Sri Lanka\").\n3. Berikan emoji bendera negara yang sesuai (contoh: 🇵🇦 / 🇲🇽 / 🇱🇰 / 🇨🇴 / 🇻🇳).\n\nKembalikan HANYA JSON murni tanpa markdown:\n{\n  \"person\": \"{{ $json.Person }}\",\n  \"gender\" : \"{{ $json.Gender }}\n  \"standard_country\": \"Nama negara baku bahasa Inggris\",\n  \"flag\": \"Emoji bendera\",\n  \"feedback\" : \"{{ $json['Feedback / Chit-chat Notes'] }}\"\n  \"topics_en\": \"{{ $json.Topics }}\",\n  \"topics_id\": \"Terjemahan topik ke bahasa Indonesia yang natural\",\n  \"social_media\": \"{{ $json['Social Media / WhatsApp (Jika Ada)'] }}\"\n}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "4f5546a7-33ab-4b89-9157-b9c3c4e29d3c",
+      "name": "Basic LLM Chain",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        240
+      ],
+      "id": "e4330855-3de5-45e2-91c2-2990f56a6edc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  try {\n    const rawText = item.json.text || \"\";\n    const cleanJson = rawText.replace(/```json/gi, \"\").replace(/```/g, \"\").trim();\n    const parsed = JSON.parse(cleanJson);\n\n    item.json.Person = parsed.person || item.json.Person || \"-\";\n    item.json.Country = parsed.standard_country || item.json.Country || \"-\";\n    item.json.Flag = parsed.flag || \"🌐\";\n    item.json.Topics_EN = parsed.topics_en || item.json.Topics || \"-\";\n    item.json.Topics_ID = parsed.topics_id || \"-\";\n    item.json.SocialMedia = parsed.social_media || item.json['Social Media / WhatsApp (Jika Ada)'] || \"-\";\n    item.json.Feedback = parsed.feedback || item.json['Feedback / Chit-chat Notes\": \"feedback'] || \"-\";\n  } catch (err) {\n    item.json.Person = item.json.Person || \"-\";\n    item.json.Country = item.json.Country || \"-\";\n    item.json.Flag = \"🌐\";\n    item.json.Topics_EN = item.json.Topics || \"-\";\n    item.json.Topics_ID = \"-\";\n    item.json.Feedback = item.json['Feedback / Chit-chat Notes\": \"feedback']\n    item.json.SocialMedia = item.json['Social Media / WhatsApp (Jika Ada)'] || \"-\";\n  }\n\n  // Rating dari form\n  item.json.MeetAgain = item.json['Want to meet again?'] || \"-\";\n\n  // Waktu Jakarta\n  item.json.Timestamp = new Date().toLocaleString(\"id-ID\", {\n    timeZone: \"Asia/Jakarta\",\n    dateStyle: \"medium\",\n    timeStyle: \"short\"\n  });\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "b1d897d5-b3b3-460d-956f-4bfb962becdd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1-XVScRtLtU2BafKFGSmceQhQZtyS54mpSeJjyw91xQw/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-XVScRtLtU2BafKFGSmceQhQZtyS54mpSeJjyw91xQw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.Timestamp }}",
+            "Person": "={{ $json.Person }}",
+            "Country": "={{ $json.Country }}",
+            "Meet Again ?": "={{ $json.MeetAgain }}",
+            "Sosial Media / Whatapps": "={{ $json.SocialMedia }}",
+            "Topic / Questions": "={{ $json.Topics_EN }}",
+            "Topic (Indo)": "={{ $json.Topics_ID }}",
+            "Feedback / Chat-chat Notes": "={{ $json.Feedback }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Person",
+              "displayName": "Person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Flag",
+              "displayName": "Flag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Meet Again ?",
+              "displayName": "Meet Again ?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sosial Media / Whatapps",
+              "displayName": "Sosial Media / Whatapps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Topic / Questions",
+              "displayName": "Topic / Questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Topic (Indo)",
+              "displayName": "Topic (Indo)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Feedback / Chat-chat Notes",
+              "displayName": "Feedback / Chat-chat Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "82dc7e48-2baa-45fb-a78a-7a5c0471a54b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "t6MISTFXgrzWlVwT",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-08T07:24:57.639Z",
+      "updatedAt": "2026-10-08T07:24:57.639Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "8cdbfd28-36f0-4d3f-bee7-f9280e4bf1db",
+    "workflowId": "t6MISTFXgrzWlVwT",
+    "nodes": [
+      {
+        "parameters": {
+          "formTitle": "Speaking Partner Talk Notes",
+          "formDescription": "Simpan catatan ngobrol dan kontak partner dalam 5 detik",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Topics",
+                "fieldType": "textarea"
+              },
+              {
+                "fieldLabel": "Person"
+              },
+              {
+                "fieldLabel": "Country"
+              },
+              {
+                "fieldLabel": "Gender",
+                "fieldType": "radio",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "Men"
+                    },
+                    {
+                      "option": "Female"
+                    }
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Feedback / Chit-chat Notes",
+                "fieldType": "textarea"
+              },
+              {
+                "fieldLabel": "Social Media / WhatsApp (Jika Ada)"
+              },
+              {
+                "fieldLabel": "Want to meet again?",
+                "fieldType": "radio",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "👍 I'd love to!"
+                    },
+                    {
+                      "option": "😐 It's okay"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "options": {
+            "respondWithOptions": {
+              "values": {
+                "respondWith": "redirect",
+                "redirectUrl": "http://localhost:5678/form/83feac62-cc53-4235-ad3b-bc7b591c5725"
+              }
+            }
+          }
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.6,
+        "position": [
+          -304,
+          0
+        ],
+        "id": "e8227c3d-ed76-475a-a1ba-0f843baf2cf3",
+        "name": "On form submission",
+        "webhookId": "83feac62-cc53-4235-ad3b-bc7b591c5725"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Kamu adalah asisten penerjemah dan pengolah data.\nBerikut data partner ngobrol bahasa Inggris:\n- Nama: \"{{ $json.Person }}\"\n- Gender : {{ $json.Gender }}\n- Negara: \"{{ $json.Country }}\"\n- Topik Obrolan (English): \"{{ $json.Topics }}\"\n- Chit Chat : \"{{ $json['Feedback / Chit-chat Notes'] }}\"\n- Kontak: \"{{ $json['Social Media / WhatsApp (Jika Ada)'] }}\"\n\nTugasmu:\n1. Terjemahkan teks 'Topik Obrolan' ke dalam Bahasa Indonesia yang natural dan mudah dipahami.\n2. Standarisasi nama negara ke bahasa Inggris baku (misal \"Columbia\" -> \"Colombia\", \"Srilangka\" -> \"Sri Lanka\").\n3. Berikan emoji bendera negara yang sesuai (contoh: 🇵🇦 / 🇲🇽 / 🇱🇰 / 🇨🇴 / 🇻🇳).\n\nKembalikan HANYA JSON murni tanpa markdown:\n{\n  \"person\": \"{{ $json.Person }}\",\n  \"gender\" : \"{{ $json.Gender }}\n  \"standard_country\": \"Nama negara baku bahasa Inggris\",\n  \"flag\": \"Emoji bendera\",\n  \"feedback\" : \"{{ $json['Feedback / Chit-chat Notes'] }}\"\n  \"topics_en\": \"{{ $json.Topics }}\",\n  \"topics_id\": \"Terjemahan topik ke bahasa Indonesia yang natural\",\n  \"social_media\": \"{{ $json['Social Media / WhatsApp (Jika Ada)'] }}\"\n}",
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          -80,
+          0
+        ],
+        "id": "4f5546a7-33ab-4b89-9157-b9c3c4e29d3c",
+        "name": "Basic LLM Chain",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-3.1-flash-lite",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1.1,
+        "position": [
+          -80,
+          192
+        ],
+        "id": "e4330855-3de5-45e2-91c2-2990f56a6edc",
+        "name": "Google Gemini Chat Model",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "LbGqYGsX4XH35zyS",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "for (const item of $input.all()) {\n  try {\n    const rawText = item.json.text || \"\";\n    const cleanJson = rawText.replace(/```json/gi, \"\").replace(/```/g, \"\").trim();\n    const parsed = JSON.parse(cleanJson);\n\n    item.json.Person = parsed.person || item.json.Person || \"-\";\n    item.json.Country = parsed.standard_country || item.json.Country || \"-\";\n    item.json.Flag = parsed.flag || \"🌐\";\n    item.json.Topics_EN = parsed.topics_en || item.json.Topics || \"-\";\n    item.json.Topics_ID = parsed.topics_id || \"-\";\n    item.json.SocialMedia = parsed.social_media || item.json['Social Media / WhatsApp (Jika Ada)'] || \"-\";\n    item.json.Feedback = parsed.feedback || item.json['Feedback / Chit-chat Notes\": \"feedback'] || \"-\";\n  } catch (err) {\n    item.json.Person = item.json.Person || \"-\";\n    item.json.Country = item.json.Country || \"-\";\n    item.json.Flag = \"🌐\";\n    item.json.Topics_EN = item.json.Topics || \"-\";\n    item.json.Topics_ID = \"-\";\n    item.json.Feedback = item.json['Feedback / Chit-chat Notes\": \"feedback']\n    item.json.SocialMedia = item.json['Social Media / WhatsApp (Jika Ada)'] || \"-\";\n  }\n\n  // Rating dari form\n  item.json.MeetAgain = item.json['Want to meet again?'] || \"-\";\n\n  // Waktu Jakarta\n  item.json.Timestamp = new Date().toLocaleString(\"id-ID\", {\n    timeZone: \"Asia/Jakarta\",\n    dateStyle: \"medium\",\n    timeStyle: \"short\"\n  });\n}\n\nreturn $input.all();"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          304,
+          0
+        ],
+        "id": "b1d897d5-b3b3-460d-956f-4bfb962becdd",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "https://docs.google.com/spreadsheets/d/1-XVScRtLtU2BafKFGSmceQhQZtyS54mpSeJjyw91xQw/edit?usp=sharing",
+            "mode": "url"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-XVScRtLtU2BafKFGSmceQhQZtyS54mpSeJjyw91xQw/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Timestamp": "={{ $json.Timestamp }}",
+              "Person": "={{ $json.Person }}",
+              "Country": "={{ $json.Country }}",
+              "Meet Again ?": "={{ $json.MeetAgain }}",
+              "Sosial Media / Whatapps": "={{ $json.SocialMedia }}",
+              "Topic / Questions": "={{ $json.Topics_EN }}",
+              "Topic (Indo)": "={{ $json.Topics_ID }}",
+              "Feedback / Chat-chat Notes": "={{ $json.Feedback }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Timestamp",
+                "displayName": "Timestamp",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Person",
+                "displayName": "Person",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Country",
+                "displayName": "Country",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Flag",
+                "displayName": "Flag",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Meet Again ?",
+                "displayName": "Meet Again ?",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Sosial Media / Whatapps",
+                "displayName": "Sosial Media / Whatapps",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Topic / Questions",
+                "displayName": "Topic / Questions",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Topic (Indo)",
+                "displayName": "Topic (Indo)",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Feedback / Chat-chat Notes",
+                "displayName": "Feedback / Chat-chat Notes",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          544,
+          0
+        ],
+        "id": "82dc7e48-2baa-45fb-a78a-7a5c0471a54b",
+        "name": "Append row in sheet",
+        "credentials": {
+          "googleApi": {
+            "id": "MTETjgV2tCTSFhF7",
+            "name": "Google Service Account account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "On form submission": {
+        "main": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Append row in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mohammad Ricky",
+    "name": "Version 8cdbfd28",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-10-08T08:44:34.283Z",
+    "updatedAt": "2026-10-08T08:46:09.613Z"
+  }
+}
