@@ -1,0 +1,197 @@
+{
+  "id": "5Ec5saG1ly0hWxtL",
+  "name": "WAHA WhatsApp Bot Auto-Respond Template",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-08-31T18:29:31.616Z",
+  "updatedAt": "2026-08-31T18:33:59.176Z",
+  "isArchived": false,
+  "versionId": "0894f020-6d4a-43be-95e0-c57d267e7e5c",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "waha-webhook",
+        "options": {}
+      },
+      "id": "7f67331e-77f9-4cd6-abdb-4ee76750bbba",
+      "name": "WAHA Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        176
+      ],
+      "webhookId": "e427167d-578b-4303-8800-be741bc9204f"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.event }}",
+              "value2": "message"
+            },
+            {
+              "value1": "={{ $json.body.payload.fromMe }}",
+              "value2": "false"
+            }
+          ]
+        }
+      },
+      "id": "47bfd55b-8872-4001-8f92-dc4c6c7166b6",
+      "name": "Filter: Hanya Pesan Masuk",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.payload.body.toLowerCase() }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "halo"
+            },
+            {
+              "value2": "pinguin",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 2
+      },
+      "id": "da49e0cf-2eac-4216-822e-dfaaa74b8fb9",
+      "name": "Cek Keyword",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9d4857dc-4520-4a79-81ab-1d85a581b2d6",
+      "name": "Respon: Halo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        176,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f3a9c54b-5f61-482a-886b-eac5a688c840",
+      "name": "Respon: Pinguin",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        176,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "295150dc-bd65-478a-aa12-7c4e6436456b",
+      "name": "Respon: Default / Fallback",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        176,
+        288
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c464f060-50f6-4051-8254-c14df228f5a6",
+      "name": "WAHA Send Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 41,
+      "position": [
+        480,
+        176
+      ]
+    }
+  ],
+  "connections": {
+    "WAHA Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter: Hanya Pesan Masuk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Hanya Pesan Masuk": {
+      "main": [
+        [
+          {
+            "node": "Cek Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cek Keyword": {
+      "main": [
+        [
+          {
+            "node": "Respon: Halo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respon: Pinguin",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respon: Default / Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "5Ec5saG1ly0hWxtL",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-08-31T18:29:31.616Z",
+      "updatedAt": "2026-08-31T18:29:31.616Z"
+    }
+  ],
+  "activeVersion": null
+}
