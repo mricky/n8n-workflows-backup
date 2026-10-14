@@ -1,0 +1,105 @@
+{
+  "id": "eAplp6TLYDCuntPu",
+  "name": "WF Belajar 5 Hit API Realtime",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-08T07:16:52.522Z",
+  "updatedAt": "2026-10-08T07:21:55.020Z",
+  "isArchived": false,
+  "versionId": "ab51cf8c-c862-4f11-b8ee-88b4a66c1b1c",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "65693d4b-b51a-46c4-ae7a-6e85168fb57e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://open.er-api.com/v6/latest/USD",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        48,
+        0
+      ],
+      "id": "e07c2eb1-9b26-460d-a467-1cde3628457d",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "499d0c7f-4291-44f7-b2e6-1845cd6bba69",
+              "name": "kurs_usd_to_idr",
+              "value": "={{ $json.rates.IDR }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        464,
+        -16
+      ],
+      "id": "78007ac3-f0b2-4fb5-9481-3e02e5edccac",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "eAplp6TLYDCuntPu",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-08T07:16:52.522Z",
+      "updatedAt": "2026-10-08T07:16:52.522Z"
+    }
+  ],
+  "activeVersion": null
+}
