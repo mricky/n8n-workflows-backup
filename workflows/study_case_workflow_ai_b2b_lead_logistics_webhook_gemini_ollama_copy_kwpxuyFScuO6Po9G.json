@@ -1,0 +1,417 @@
+{
+  "id": "kwpxuyFScuO6Po9G",
+  "name": "Study Case Workflow AI B2B Lead Logistics Webhook | Gemini | Ollama copy",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-10T01:54:38.606Z",
+  "updatedAt": "2026-10-10T02:15:39.358Z",
+  "isArchived": false,
+  "versionId": "3ded6d73-de42-4ee5-bdbb-a3807f9f2634",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Head of Commercial & Enterprise Lead Qualification AI untuk Perusahaan Logistik 3PL dan Transportasi Armada Truk.\nTugasmu: Evaluasi kelayakan permintaan penawaran (RFQ) B2B berikut dan berikan skor 0 - 100.\n\nData RFQ Calon Klien:\n- PIC: {{ $json.body.pic_name}}\n- Perusahaan: {{ $json.body.company_name}}\n- Kontak: {{ $json.body.contact }}\n- Volume & Armada: {{ $json.body.volume_armada}}\n- Rute & Muatan: {{ $json.body.rute_muatan }}\n\nKriteria Penilaian Logistik:\n- HOT (Skor 80 - 100): Volume rutin (> 20-50 ritase/bulan), tipe armada besar (Tronton/Wingbox/Trailer), rute jelas (antarkota/pulau), atau mencari kontrak jangka panjang/tahunan (Enterprise FMCG/Manufaktur).\n- WARM (Skor 50 - 79): Volume menengah (10-20 ritase/bulan), armada CDD/CDE, atau project spot mingguan/musiman.\n- COLD (Skor 0 - 49): Pengiriman retail/pindahan kos/eceran < 5 pengiriman, atau hanya tanya-tanya harga tanpa komitmen.\n\nKembalikan respon HANYA dalam format JSON murni tanpa markdown:\n{\n  \"lead_score\": 90,\n  \"category\": \"HOT\",\n  \"urgency_level\": \"High\",\n  \"potential_value\": \"Besar\",\n  \"summary\": \"Ringkasan kebutuhan logistik dalam 1 kalimat\",\n  \"sales_strategy\": \"Taktik pendekatan Key Account Manager saat menghubungi klien\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        48,
+        0
+      ],
+      "id": "08c9c428-b317-4a0a-b4fc-b37aedbddabd",
+      "name": "Basic LLM Chain",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        240
+      ],
+      "id": "2b432c42-cc29-49e3-b5b9-504032fc92b5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  let parsed = {\n    lead_score: 0,\n    category: \"COLD\",\n    urgency_level: \"Low\",\n    potential_value: \"Kecil\",\n    summary: \"-\",\n    sales_strategy: \"-\"\n  };\n\n  try {\n    // Ambil output teks dari AI (Gemini atau Ollama)\n    const rawText = item.json.text || item.json.response || \"\";\n    const cleanJson = rawText.replace(/```json|```/gi, '').trim();\n    parsed = JSON.parse(cleanJson);\n  } catch (err) {\n    parsed.summary = \"Gagal mem-parse respon AI ke JSON\";\n  }\n\n  // 1. Ambil data asli dari node Webhook\n  const webhookNode = $('Webhook').first().json;\n  const webhookData = webhookNode.body || webhookNode || {};\n\n  // 2. Cek AI engine yang memproses data\n  let aiProvider = \"Google Gemini\";\n  try {\n    if ($('LLM Ollama').all().length > 0) {\n      aiProvider = \"Local Ollama\";\n    }\n  } catch (e) {\n    aiProvider = \"Google Gemini\";\n  }\n\n  // 3. Bentuk output JSON bersih dan terstruktur\n  item.json = {\n    pic: webhookData.pic_name || \"-\",\n    perusahaan: webhookData.company_name || \"-\",\n    kontak: webhookData.contact || \"-\",\n    volume_armada: webhookData.volume_armada || \"-\",\n    rute_muatan: webhookData.rute_muatan || \"-\",\n    lead_score: Number(parsed.lead_score) || 0,\n    category: (parsed.category || \"COLD\").toUpperCase(),\n    urgency: parsed.urgency_level || \"Low\",\n    potential_value: parsed.potential_value || \"-\",\n    summary: parsed.summary || \"-\",\n    sales_strategy: parsed.sales_strategy || \"-\",\n    ai_engine: aiProvider,\n    waktu_masuk: new Date().toLocaleString(\"id-ID\", { timeZone: \"Asia/Jakarta\" })\n  };\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "ffa79dd0-6468-45db-968f-969aa50cc064",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        352,
+        448
+      ],
+      "id": "adae46fd-9ef5-4334-9fb2-b32fc26e91b8",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "cpNXtxEBYXQ8RbIr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Head of Commercial & Enterprise Lead Qualification AI untuk Perusahaan Logistik 3PL dan Transportasi Armada Truk.\nTugasmu: Evaluasi kelayakan permintaan penawaran (RFQ) B2B berikut dan berikan skor kelayakan prospek antara 0 - 100.\n\nData RFQ Calon Klien:\n- PIC: {{ $('Webhook').item.json.body.pic_name}}\n- Perusahaan: {{ $('Webhook').item.json.body.company_name}}\n- Kontak: {{ $('Webhook').item.json.body.contact}}\n- Volume & Armada: {{ $('Webhook').item.json.body.volume_armada}}\n- Rute & Muatan: {{ $('Webhook').item.json.body.rute_muatan}}\n\nKriteria Penilaian Logistik:\n- HOT (Skor 80 - 100): Volume rutin (> 20-50 ritase/bulan), tipe armada besar (Tronton/Wingbox/Trailer), rute jelas (antarkota/pulau), atau mencari kontrak jangka panjang/tahunan (Enterprise FMCG/Manufaktur).\n- WARM (Skor 50 - 79): Volume menengah (10-20 ritase/bulan), armada CDD/CDE, atau project spot mingguan/musiman.\n- COLD (Skor 0 - 49): Pengiriman retail/pindahan kos/eceran < 5 pengiriman, atau hanya tanya-tanya harga tanpa komitmen.\n\nKembalikan respon HANYA dalam format JSON murni tanpa pembuka atau penutup markdown (tanpa ```json):\n{\n  \"lead_score\": 90,\n  \"category\": \"HOT\",\n  \"urgency_level\": \"High\",\n  \"potential_value\": \"Besar\",\n  \"summary\": \"Ringkasan kebutuhan logistik dalam 1 kalimat\",\n  \"sales_strategy\": \"Taktik pendekatan Key Account Manager saat menghubungi klien\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        352,
+        240
+      ],
+      "id": "073d80b3-25fa-415a-9a51-bab1fb6f2698",
+      "name": "LLM Ollama"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1uzNDPhF2wy84B4m6a28qOXhwiFHDAvkFoWoOxugaOFc/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzNDPhF2wy84B4m6a28qOXhwiFHDAvkFoWoOxugaOFc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Waktu": "={{ $json.waktu_masuk }}",
+            "Perusahaan": "={{ $json.perusahaan }}",
+            "PIC": "={{ $json.pic }}",
+            "Kontak": "={{ $json.kontak }}",
+            "Volume Armada": "={{ $json.volume_armada }}",
+            "Rute & Muatan": "={{ $json.rute_muatan }}",
+            "SKOR AI": "={{ $json.lead_score }}",
+            "Kategori": "={{ $json.category }}",
+            "Urgensi": "={{ $json.urgency }}",
+            "Potensi Bisnis": "={{ $json.potential_value }}",
+            "Ringkasan AI": "={{ $json.summary }}",
+            "Strategi Sales": "={{ $json.sales_strategy }}",
+            "AI Engine": "={{ $json.ai_engine }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Waktu",
+              "displayName": "Waktu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Perusahaan",
+              "displayName": "Perusahaan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PIC",
+              "displayName": "PIC",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kontak",
+              "displayName": "Kontak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Volume Armada",
+              "displayName": "Volume Armada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rute & Muatan",
+              "displayName": "Rute & Muatan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SKOR AI",
+              "displayName": "SKOR AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kategori",
+              "displayName": "Kategori",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgensi",
+              "displayName": "Urgensi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Potensi Bisnis",
+              "displayName": "Potensi Bisnis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ringkasan AI",
+              "displayName": "Ringkasan AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Strategi Sales",
+              "displayName": "Strategi Sales",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Engine",
+              "displayName": "AI Engine",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "c3b369dc-973c-4c23-89c6-9e6f8ad8000b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "mricky.it@gmail.com",
+        "toEmail": "ricky.kuasep@gmail.com",
+        "subject": "=🚨 [EXECUTIVE ALERT - HOT RFQ LOGISTIK] {{ $('Code in JavaScript').item.json.perusahaan }} (Skor AI: {{ $('Code in JavaScript').item.json.lead_score }}/100)\n",
+        "html": "=<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; padding: 25px; border: 2px solid #0284c7; border-radius: 10px; background-color: #f8fafc;\">\n  <div style=\"background-color: #0284c7; padding: 12px 20px; border-radius: 6px; color: #ffffff; margin-bottom: 20px;\">\n    <h2 style=\"margin: 0; font-size: 20px;\">🚚 EXECUTIVE ALERT: INBOUND RFQ PRIORITAS TINGGI</h2>\n  </div>\n  \n  <p style=\"font-size: 15px; color: #334155;\">Yth. Direksi & Tim Commercial,</p>\n  <p style=\"font-size: 14px; color: #475569;\">Sistem AI Lead Qualification baru saja mendeteksi calon klien korporat bernilai tinggi. Berikut rinciannya:</p>\n  \n  <table style=\"width: 100%; border-collapse: collapse; margin-top: 15px; background: #ffffff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\">\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; width: 35%; color: #64748b;\">Perusahaan:</td><td style=\"padding: 10px 15px; font-weight: bold; color: #0f172a;\">{{ $('Code in JavaScript').item.json.perusahaan }}</td></tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">PIC:</td><td style=\"padding: 10px 15px; color: #0f172a;\">{{ $('Code in JavaScript').item.json.pic }}</td></tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">Kontak:</td><td style=\"padding: 10px 15px; color: #0284c7; font-weight: bold;\">{{ $('Code in JavaScript').item.json.kontak }}</td></tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">Volume Armada:</td><td style=\"padding: 10px 15px; color: #0f172a; font-weight: bold;\">{{ $('Code in JavaScript').item.json.volume_armada }}</td></tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">Rute & Muatan:</td><td style=\"padding: 10px 15px; color: #0f172a;\">{{ $('Code in JavaScript').item.json.rute_muatan }}</td></tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">Skor Kelayakan AI:</td><td style=\"padding: 10px 15px;\"><span style=\"background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-weight: bold;\">{{ $('Code in JavaScript').item.json.lead_score }} / 100 ({{ $('Code in JavaScript').item.json.category }})</span></td></tr>\n    <tr style=\"border-bottom: 1px solid #e2e8f0;\"><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">Analisis Kebutuhan:</td><td style=\"padding: 10px 15px; color: #334155;\">{{ $('Code in JavaScript').item.json.summary }}</td></tr>\n    <tr><td style=\"padding: 10px 15px; font-weight: bold; color: #64748b;\">Rekomendasi Taktik Sales:</td><td style=\"padding: 10px 15px; color: #0369a1; font-style: italic;\">{{ $('Code in JavaScript').item.json.sales_strategy }}</td></tr>\n  </table>\n  \n  <p style=\"margin-top: 20px; font-size: 13px; color: #94a3b8; text-align: center;\">⚡ Diproses otomatis oleh n8n Enterprise AI Router (Engine: {{ $('Code in JavaScript').item.json.ai_engine }})</p>\n</div>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "629af54f-726c-4c48-ac2e-bc5037b39ef7",
+      "name": "Send an Email",
+      "webhookId": "5c55f437-37d8-4f3c-8647-65a3f756250e",
+      "credentials": {
+        "smtp": {
+          "id": "wy9Q0wNZZHJ5BP2I",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "=79de1052-02d2-41a9-9236-2cfade9de607",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "f7184faa-9ad2-4061-beb9-4f36f389f371",
+      "name": "Webhook",
+      "webhookId": "79de1052-02d2-41a9-9236-2cfade9de607"
+    }
+  ],
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Ollama",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Ollama": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "kwpxuyFScuO6Po9G",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-10T01:54:38.606Z",
+      "updatedAt": "2026-10-10T01:54:38.606Z"
+    }
+  ],
+  "activeVersion": null
+}
