@@ -1,0 +1,135 @@
+{
+  "id": "AeRTXIK7nB35OA1k",
+  "name": "Supabase Database Operations",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-12T14:07:10.582Z",
+  "updatedAt": "2026-10-12T14:17:04.204Z",
+  "isArchived": false,
+  "versionId": "7df5e875-f2ee-4da1-b28d-df657bc31ba2",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "924a1e08-1110-4650-a31f-ab16bfea8933",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "operation": "getAll",
+        "tableId": "customers"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "62752286-0d99-413e-8dac-2c8f455e3b14",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "1uPFDyXdNAbMDRYf",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "tableId": "customers",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "=Ahmad Fauzi "
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "ahmad@technoindonesia.com"
+            },
+            {
+              "fieldId": "company",
+              "fieldValue": "PT Techno Indonesia."
+            },
+            {
+              "fieldId": "total_orders",
+              "fieldValue": "1"
+            },
+            {
+              "fieldId": "total_spent",
+              "fieldValue": "50000"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "4bbf1369-cf5c-4bae-abe8-cc05815be1d0",
+      "name": "Create a row",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "1uPFDyXdNAbMDRYf",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "AeRTXIK7nB35OA1k",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-12T14:07:10.582Z",
+      "updatedAt": "2026-10-12T14:07:10.582Z"
+    }
+  ],
+  "activeVersion": null
+}
