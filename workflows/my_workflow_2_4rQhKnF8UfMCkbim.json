@@ -1,0 +1,66 @@
+{
+  "id": "4rQhKnF8UfMCkbim",
+  "name": "My workflow 2",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-01T15:42:44.303Z",
+  "updatedAt": "2026-09-01T16:06:27.256Z",
+  "isArchived": false,
+  "versionId": "9e8b8b22-03b4-41ff-ac18-46da03332c63",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -48
+      ],
+      "id": "e789ceb8-33da-4bfe-91dc-26d8b4522757",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "b014a225-4135-48b2-8884-536974912b21",
+      "name": "Get row(s) in sheet"
+    }
+  ],
+  "connections": {},
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "4rQhKnF8UfMCkbim",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-09-01T15:42:44.303Z",
+      "updatedAt": "2026-09-01T15:42:44.303Z"
+    }
+  ],
+  "activeVersion": null
+}
