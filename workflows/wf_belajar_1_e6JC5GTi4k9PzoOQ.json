@@ -1,0 +1,102 @@
+{
+  "id": "e6JC5GTi4k9PzoOQ",
+  "name": "WF Belajar 1",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-07T07:50:42.591Z",
+  "updatedAt": "2026-10-07T08:32:52.567Z",
+  "isArchived": false,
+  "versionId": "fc0d0094-fae3-472d-9ad2-0c5210306419",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "29262519-791b-4f82-8e75-151f86f8ee6b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "be816201-6d82-4d16-b28e-542355bb1fc3",
+              "name": "pesan",
+              "value": "Hallo! ini workflow pertama saya ya ya",
+              "type": "string"
+            },
+            {
+              "id": "b9a147c6-144e-4f3c-a093-d3d82ea8d079",
+              "name": "nama",
+              "value": "Ricky",
+              "type": "string"
+            },
+            {
+              "id": "f4616aee-3f32-4ece-b534-6f85434881ba",
+              "name": "pekerjaan",
+              "value": "Software Developer",
+              "type": "string"
+            },
+            {
+              "id": "dcd77de6-8c35-4e96-b758-d79a4f2de13f",
+              "name": "umur",
+              "value": "38",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5052872e-78ec-4abd-906b-8ca209f5b236",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "e6JC5GTi4k9PzoOQ",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-07T07:50:42.591Z",
+      "updatedAt": "2026-10-07T07:50:42.591Z"
+    }
+  ],
+  "activeVersion": null
+}
