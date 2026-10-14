@@ -1,0 +1,265 @@
+{
+  "id": "hPJCRycdFAzDCyDl",
+  "name": "AI Multi-Channel Social & Auto-Reply Engine store Bank Content",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-10T11:37:52.520Z",
+  "updatedAt": "2026-10-10T16:27:54.541Z",
+  "isArchived": false,
+  "versionId": "b4d85f3e-ac73-473b-9c0d-62f7586b6095",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -48
+      ],
+      "id": "a6a59238-f104-4da8-8e97-3662ccd40155",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Senior Content Strategist, Educational Copywriter, & SEO Specialist untuk \"Simpul Sekolah\" (simpulsekolah.id - aplikasi manajemen sekolah all-in-one: absensi online guru & siswa, pembayaran SPP & keuangan, E-Rapor kurikulum merdeka, administrasi TU, dan notifikasi WhatsApp otomatis).\nTugasmu: Ambil TOPIK berikut dan hasilkan PAKET KONTEN OMNICHANNEL LENGKAP:\n1. ARTIKEL BLOG SEO (Judul menarik, isi edukatif dengan sub-heading, kesimpulan, dan meta deskripsi).\n2. KONTEN SOSIAL MEDIA (Threads, Facebook, Instagram).\n3. PROMPT GAMBAR AI (Deskripsi visual dalam bahasa Inggris untuk ilustrasi sekolah modern).\nTopik Konten: {{ $json.topik || \"Beban administrasi guru dan rekap SPP nunggak yang bikin lembur akhir semester\" }}\nPANDUAN FORMAT KONTEN:\n1. BLOG ARTICLE: Format HTML ringkas, informatif, 400-600 kata, ramah SEO untuk kepala sekolah & guru.\n2. FORMAT THREADS: 4-5 slide pendek (Slide 1 Hook tajam, Slide 2-3 Masalah & Solusi, Slide 4 Simpul Sekolah, Slide 5 CTA diskusi).\n3. FORMAT FACEBOOK: 1 artikel storytelling panjang (300-500 kata), emosional, hangat, ada emoji, dan ajakan demo di simpulsekolah.id.\n4. FORMAT INSTAGRAM: Konsep 5 slide Carousel gambar (Slide 1 Cover sampai Slide 5 CTA) + Caption menarik + 5-8 Hashtags.\n5. PROMPT GAMBAR AI: Deskripsi fotorealistik guru Indonesia di kelas cerdas digital modern (Bahasa Inggris, cinematic lighting, photorealistic, 8k).\nKEMBALIKAN HANYA DALAM FORMAT JSON MURNI TANPA MARKDOWN TAMBAHAN:\n{\n  \"judul_topik\": \"Judul singkat topik\",\n  \"blog\": {\n    \"title\": \"Judul Artikel Blog yang SEO-Friendly\",\n    \"slug\": \"judul-artikel-blog-seo-friendly\",\n    \"meta_description\": \"Ringkasan artikel dalam 150 karakter...\",\n    \"content_html\": \"<h2>Sub Judul</h2><p>Paragraf 1...</p><p>Paragraf 2...</p>\"\n  },\n  \"image_prompt\": \"A modern Indonesian school teacher smiling happily in a bright digital classroom, holding a tablet with clean school dashboard, photorealistic, cinematic lighting, pastel tones, 8k\",\n  \"threads\": [\n    \"Slide 1: ...\",\n    \"Slide 2: ...\",\n    \"Slide 3: ...\",\n    \"Slide 4: ...\",\n    \"Slide 5: ...\"\n  ],\n  \"facebook_post\": \"Judul FB\\n\\nCerita 1...\\n\\nSolusi Simpul Sekolah...\\n\\nLink demo simpulsekolah.id\",\n  \"instagram\": {\n    \"carousel_slides\": [\n      \"Slide 1 (Cover): ...\",\n      \"Slide 2: ...\",\n      \"Slide 3: ...\",\n      \"Slide 4: ...\",\n      \"Slide 5 (CTA): ...\"\n    ],\n    \"caption\": \"Teks caption Instagram lengkap...\",\n    \"hashtags\": \"#SimpulSekolah #GuruIndonesia #SekolahDigital #ManajemenSekolah\"\n  }\n}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -96,
+        -48
+      ],
+      "id": "10e55d06-067a-4193-81a2-18df5108f2f9",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        160
+      ],
+      "id": "345bdf6d-b093-4617-ab43-182804d7998f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  let parsed = {\n    judul_topik: \"Konten Simpul Sekolah\",\n    blog: {\n      title: \"Digitalisasi Sekolah Modern\",\n      slug: \"digitalisasi-sekolah-modern\",\n      meta_description: \"-\",\n      content_html: \"<p>Artikel Simpul Sekolah</p>\"\n    },\n    image_prompt: \"A modern Indonesian teacher in a digital classroom, photorealistic, 8k\",\n    threads: [],\n    facebook_post: \"-\",\n    instagram: {\n      carousel_slides: [],\n      caption: \"-\",\n      hashtags: \"-\"\n    }\n  };\n\n  try {\n    const rawText = item.json.text || item.json.output || item.json.response || \"\";\n    const cleanJson = rawText.replace(/```json|```/gi, '').trim();\n    parsed = JSON.parse(cleanJson);\n  } catch (err) {\n    parsed.judul_topik = \"Gagal mem-parse output AI\";\n    parsed.facebook_post = item.json.text || \"\";\n  }\n\n  // Format preview Threads\n  const threadsPreview = Array.isArray(parsed.threads)\n    ? parsed.threads.map((t, idx) => `[Slide ${idx + 1}]\\n${t}`).join(\"\\n\\n---\\n\\n\")\n    : \"-\";\n\n  // Format preview Carousel IG\n  const igSlidesPreview = Array.isArray(parsed.instagram?.carousel_slides)\n    ? parsed.instagram.carousel_slides.map((s, idx) => `[Slide ${idx + 1}]\\n${s}`).join(\"\\n\\n\")\n    : \"-\";\n\n  // Generate URL Gambar AI Otomatis via Flux.1 (Resolusi 1080x1080)\n  const encodedPrompt = encodeURIComponent(parsed.image_prompt || \"indonesian school teacher tablet smart classroom\");\n  const aiImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1080&height=1080&model=flux&nologo=true`;\n\n   const uniqueId = `CNT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;\n\n  item.json = {\n    id: uniqueId,\n    tanggal_dibuat: new Date().toLocaleString(\"id-ID\", { timeZone: \"Asia/Jakarta\" }),\n    topik_utama: parsed.judul_topik || \"Edukasi Digitalisasi Sekolah\",\n    // Data Blog (Siap dikirim ke API Simpul Sekolah)\n    blog_payload: {\n      title: parsed.blog?.title || parsed.judul_topik,\n      slug: parsed.blog?.slug || \"artikel-sekolah\",\n      meta_description: parsed.blog?.meta_description || \"-\",\n      content: parsed.blog?.content_html || \"\",\n      featured_image: aiImageUrl\n    },\n    // Data Media Sosial & Gambar\n    image_url: aiImageUrl,\n    image_prompt: parsed.image_prompt || \"-\",\n    threads_content: threadsPreview,\n    facebook_content: parsed.facebook_post || \"-\",\n    instagram_content: `${igSlidesPreview}\\n\\n[CAPTION]\\n${parsed.instagram?.caption || \"\"}\\n\\n[HASHTAGS]\\n${parsed.instagram?.hashtags || \"\"}`,\n    status: \"DRAFT\"\n  };\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        -48
+      ],
+      "id": "2a185bf7-8bfc-4228-a895-418b823f3625",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1YRZAmUQNPR-RlxynjyA8SCsDWMCP9BnrcFrwdwWIy5A/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YRZAmUQNPR-RlxynjyA8SCsDWMCP9BnrcFrwdwWIy5A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "tanggal_dibuat": "={{ $json.tanggal_dibuat }}",
+            "image_url": "={{ $json.image_url }}",
+            "threads_content": "={{ $json.threads_content }}",
+            "facebook_content": "={{ $json.facebook_content }}",
+            "instagram_content": "={{ $json.instagram_content }}",
+            "status": "={{ $json.status }}",
+            "topik_utama": "={{ $json.topik_utama }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tanggal_dibuat",
+              "displayName": "tanggal_dibuat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topik_utama",
+              "displayName": "topik_utama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "threads_content",
+              "displayName": "threads_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "facebook_content",
+              "displayName": "facebook_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_content",
+              "displayName": "instagram_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        496,
+        -48
+      ],
+      "id": "62367e65-c09d-4967-a54d-a3fb87479851",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "hPJCRycdFAzDCyDl",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-10T11:37:52.520Z",
+      "updatedAt": "2026-10-10T11:37:52.520Z"
+    }
+  ],
+  "activeVersion": null
+}
