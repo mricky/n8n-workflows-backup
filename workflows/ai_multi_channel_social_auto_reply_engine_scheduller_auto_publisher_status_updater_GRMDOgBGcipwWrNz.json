@@ -1,0 +1,433 @@
+{
+  "id": "GRMDOgBGcipwWrNz",
+  "name": "AI Multi-Channel Social & Auto-Reply Engine Scheduller Auto-Publisher & Status Updater",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-10T16:00:24.095Z",
+  "updatedAt": "2026-10-11T18:36:35.637Z",
+  "isArchived": false,
+  "versionId": "74109238-de3f-42b1-b509-caacaf19f065",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -64
+      ],
+      "id": "0ad2f98f-930b-45fc-83ed-d322e9f62220",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        192
+      ],
+      "id": "9ef27285-df79-4093-9857-1956579b5514",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1YRZAmUQNPR-RlxynjyA8SCsDWMCP9BnrcFrwdwWIy5A/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YRZAmUQNPR-RlxynjyA8SCsDWMCP9BnrcFrwdwWIy5A/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "READY"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        -64
+      ],
+      "id": "e64c6017-33d4-44e6-8518-5dd8ebba96ff",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Ambil data asli baris dari \"Get row(s) in sheet\"\nconst sheetItem = $('Get row(s) in sheet').first().json;\n\n// 2. Ambil ID hasil publish (Facebook & Instagram)\nlet fbPostId = 'N/A';\nlet igPostId = 'N/A';\n\ntry {\n  fbPostId = $('HTTP Facebook').first().json.id || 'N/A';\n} catch (e) {}\n\ntry {\n  igPostId = $('Publish IG Media').first().json.id || 'N/A';\n} catch (e) {}\n\n// 3. Format waktu WIB\nconst waktuTayang = new Date().toLocaleString(\"id-ID\", { \n  timeZone: \"Asia/Jakarta\" \n});\n\n// 4. Return data bersih khusus untuk Google Sheets\nreturn [\n  {\n    json: {\n      id: sheetItem.id,\n      status: \"POSTED\",\n      Status: \"POSTED\", // cadangan jika header sheet Anda huruf kapital 'Status'\n      tanggal_tayang: waktuTayang,\n      log_info: `Konten #${sheetItem.id} sukses tayang! FB: ${fbPostId}, IG: ${igPostId}`\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        -64
+      ],
+      "id": "fa08ad69-efd5-487f-8db5-81b6c0b79a76",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1YRZAmUQNPR-RlxynjyA8SCsDWMCP9BnrcFrwdwWIy5A/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YRZAmUQNPR-RlxynjyA8SCsDWMCP9BnrcFrwdwWIy5A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.status_baru }}",
+            "tanggal_tayang": "={{ $json.tanggal_tayang }}",
+            "id": "={{ $('Get row(s) in sheet').item.json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tanggal_dibuat",
+              "displayName": "tanggal_dibuat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "topik_utama",
+              "displayName": "topik_utama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "threads_content",
+              "displayName": "threads_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "facebook_content",
+              "displayName": "facebook_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instagram_content",
+              "displayName": "instagram_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tanggal_tayang",
+              "displayName": "tanggal_tayang",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        -64
+      ],
+      "id": "87c00f38-37ab-4ce0-9a6d-c27f1ae825a7",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/1175958298943856/photos",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.image_url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.facebook_content }}"
+            },
+            {
+              "name": "access_token",
+              "value": "EAAllNZC3MAy0BSoq1qOGsFGPl3W17Q5tknDHZBA2rVjL5G5onvFhB3W99tICIbS867A7XbqCxlLq4UyU3RcEFug5VaP1N4tNdZBtg1nwhbZBeWluwXx3GfmTDaBrQ2BmvZAkLGJ45JipYsn5IAPeDJSIBYCx6fJLV43569wfgXAc3TBhZAZBlMWnEug1g6W2Lr6Bt1iYe9G8cCvUhJ8YDwjTmoYqqHgzp76af4F3ZCmPAAZDZD"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        256,
+        -64
+      ],
+      "id": "1ca904fb-88a2-431a-9e52-dda5fb1554c2",
+      "name": "HTTP Facebook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/17841421971049634/media",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=image_url",
+              "value": "={{ $json.image_url }}"
+            },
+            {
+              "name": "access_token",
+              "value": "EAAllNZC3MAy0BSs20S2gMApQLQfpI4lQaaUxSFlDsmT7GoVuNqXduTEBqReMEhAc16SmaYrrNYKjKZB8bPbu4Q8BJV2u50lkaICyCYtRZAySBG9FtYNNGqSreAfUY18iSInAsIMjOhAT75uVQVG7ZC7jnydJmgSzOsrZCJZBDYZBd8JwK0PtcZAYcHfOpFmzICoMQN3uCG6MhnbktUnxPrVFmFOEZBvzAnhVtGO8IHAfzEhK2bTYxIOxeJlqn5ZBZAxqpbJlJd0ylsMKmvg5ZCpMVomZCEgZDZD"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        80,
+        224
+      ],
+      "id": "261b6c4f-3672-4208-8a6d-ba5194142ba7",
+      "name": "HTTP Instagram"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/17841421971049634/media_publish",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "access_token",
+              "value": "EAAllNZC3MAy0BSs20S2gMApQLQfpI4lQaaUxSFlDsmT7GoVuNqXduTEBqReMEhAc16SmaYrrNYKjKZB8bPbu4Q8BJV2u50lkaICyCYtRZAySBG9FtYNNGqSreAfUY18iSInAsIMjOhAT75uVQVG7ZC7jnydJmgSzOsrZCJZBDYZBd8JwK0PtcZAYcHfOpFmzICoMQN3uCG6MhnbktUnxPrVFmFOEZBvzAnhVtGO8IHAfzEhK2bTYxIOxeJlqn5ZBZAxqpbJlJd0ylsMKmvg5ZCpMVomZCEgZDZD"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        368,
+        224
+      ],
+      "id": "d604179f-7a1c-40df-b317-8c3684653df4",
+      "name": "Publish IG Media"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Facebook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Facebook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Instagram": {
+      "main": [
+        [
+          {
+            "node": "Publish IG Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish IG Media": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "GRMDOgBGcipwWrNz",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-10T16:00:24.095Z",
+      "updatedAt": "2026-10-10T16:00:24.095Z"
+    }
+  ],
+  "activeVersion": null
+}
