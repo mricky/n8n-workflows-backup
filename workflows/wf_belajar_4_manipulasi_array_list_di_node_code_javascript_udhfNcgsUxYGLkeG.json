@@ -1,0 +1,165 @@
+{
+  "id": "udhfNcgsUxYGLkeG",
+  "name": "WF Belajar 4 Manipulasi Array & List di Node Code Javascript",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-08T07:06:40.850Z",
+  "updatedAt": "2026-10-08T07:16:26.315Z",
+  "isArchived": false,
+  "versionId": "e9029de9-d362-4aa7-8d49-85d86d9ae88e",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "6d838c3c-7e47-4107-a776-95b574b9de1b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawOrders = [\n  { id: 101, customer: \"Ricky\", category: \"VIP\", items: [\"Laptop\", \"Mouse\"], total: 15000000 },\n  { id: 102, customer: \"Budi\", category: \"REGULER\", items: [\"Keyboard\"], total: 450000 },\n  { id: 103, customer: \"Siti\", category: \"KOMPLAIN_URGENT\", items: [\"Monitor Rusak\"], total: 3200000 }\n];\n\n// Kita manipulasi: Filter, beri diskon, & format ke struktur n8n\nconst result = [];\nfor (const order of rawOrders) {\n  // Hitung diskon khusus VIP\n  let discount = 0;\n  if (order.category === \"VIP\") {\n    discount = order.total * 0.10; // Diskon 10%\n  }\n  \n  // Format menjadi objek n8n\n  result.push({\n    json: {\n      order_id: order.id,\n      customer_name: order.customer.toUpperCase(),\n      category: order.category,\n      total_items: order.items.length,\n      original_total: order.total,\n      discount_amount: discount,\n      final_total: order.total - discount,\n      processed_at: new Date().toISOString()\n    }\n  });\n}\n// Mengembalikan 3 item baris terpisah di n8n\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        0
+      ],
+      "id": "716d93a0-6ca9-4002-a942-7eee9fe24c8a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "VIP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e51b9920-e953-4942-aa42-36618aef40c7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "39475eac-1446-4dfd-9e00-f9eb65a410ce",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "REGULER",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6e70e1c3-5c6b-4d67-ad7a-fee23028f45e",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "KOMPLAIN_URGENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        -16
+      ],
+      "id": "553184d5-e711-444f-b5f7-5a68fb9c3f45",
+      "name": "Switch"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "udhfNcgsUxYGLkeG",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-08T07:06:40.850Z",
+      "updatedAt": "2026-10-08T07:06:40.850Z"
+    }
+  ],
+  "activeVersion": null
+}
