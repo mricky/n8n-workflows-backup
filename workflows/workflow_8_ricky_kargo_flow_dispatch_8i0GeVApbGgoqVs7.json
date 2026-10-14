@@ -1,0 +1,485 @@
+{
+  "id": "8i0GeVApbGgoqVs7",
+  "name": "Workflow 8 - Ricky Kargo Flow Dispatch",
+  "active": true,
+  "activeVersionId": "86223a77-0768-41ac-b76c-166bf2320dd2",
+  "createdAt": "2026-10-12T14:43:47.653Z",
+  "updatedAt": "2026-10-13T08:08:37.949Z",
+  "isArchived": false,
+  "versionId": "86223a77-0768-41ac-b76c-166bf2320dd2",
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "driver-pod",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "edd5b748-657a-4350-88e2-dd4c606650ac",
+      "name": "Webhook POD",
+      "webhookId": "891a6d6b-50c4-4961-8c05-44694ca82b3d"
+    },
+    {
+      "parameters": {
+        "tableId": "deliveries",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "do_number",
+              "fieldValue": "={{ $json.body.do_number }}"
+            },
+            {
+              "fieldId": "driver_name",
+              "fieldValue": "={{ $json.body.driver_name }}"
+            },
+            {
+              "fieldId": "vehicle_plate",
+              "fieldValue": "={{ $json.body.vehicle_plate }}"
+            },
+            {
+              "fieldId": "recipient",
+              "fieldValue": "={{ $json.body.recipient }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.body.status }}"
+            },
+            {
+              "fieldId": "notes",
+              "fieldValue": "= {{ $json.body.notes }}"
+            },
+            {
+              "fieldId": "has_photo",
+              "fieldValue": "={{ $json.body.has_photo }}"
+            },
+            {
+              "fieldId": "submitted_at",
+              "fieldValue": "={{ $json.body.submitted_at }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        256,
+        0
+      ],
+      "id": "4b6f89bd-6117-4bff-aefc-77e88bbdad25",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "1uPFDyXdNAbMDRYf",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        992,
+        0
+      ],
+      "id": "f4595b8f-eaa5-47e5-9d12-cf998c32e2b0",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Ambil foto dari node 'Webhook POD'\nlet photoBase64 = null;\ntry {\n  photoBase64 = $('Webhook POD').first().json.body?.photo_base64;\n} catch (err) {\n  // Abaikan jika tidak ketemu\n}\n\n// 2. Jika supir tidak melampirkan foto saat tes, gunakan sample image agar tidak error\nif (!photoBase64) {\n  photoBase64 = \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\";\n}\n\n// 3. Bersihkan prefix Base64\nconst cleanBase64 = photoBase64.replace(/^data:image\\/\\w+;base64,/, '');\nconst doNumber = $input.item.json.do_number || 'SJ-2026';\n\n// 4. Return data JSON + binary data untuk Google Drive\nreturn {\n  json: $input.item.json,\n  binary: {\n    data: {\n      data: cleanBase64,\n      mimeType: \"image/png\",\n      fileName: `POD_${doNumber}_${Date.now()}.png`\n    }\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        0
+      ],
+      "id": "99e77b4c-7866-4b08-a5fd-4a938b2211fa",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "19nng5X-cPZC10Ke346xzCoBw1s9XeLnh",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        736,
+        0
+      ],
+      "id": "51828c19-a940-4943-aa97-0ff9c311f78b",
+      "name": "Upload POD File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bnZ5mcdT3JivbX5E",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "driver-portal",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        240
+      ],
+      "id": "a1111111-2222-3333-4444-555555555551",
+      "name": "Webhook Portal"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { html: \"<!DOCTYPE html>\\n<html lang=\\\"id\\\">\\n<head>\\n  <meta charset=\\\"UTF-8\\\">\\n  <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\\\">\\n  <title>Ricky Kargo Flow \\u2014 Electronic Proof of Delivery (e-POD)</title>\\n  <link rel=\\\"preconnect\\\" href=\\\"https://fonts.googleapis.com\\\">\\n  <link rel=\\\"preconnect\\\" href=\\\"https://fonts.gstatic.com\\\" crossorigin>\\n  <link href=\\\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\\\" rel=\\\"stylesheet\\\">\\n  <style>\\n    :root {\\n      --bg: #090a0f;\\n      --surface: #12141c;\\n      --surface-elevated: #1a1d28;\\n      --border: #262a3b;\\n      --border-focus: #3b82f6;\\n      --text-primary: #f1f5f9;\\n      --text-secondary: #94a3b8;\\n      --text-tertiary: #64748b;\\n      --accent: #2563eb;\\n      --accent-hover: #1d4ed8;\\n      --emerald: #10b981;\\n      --emerald-subtle: rgba(16, 185, 129, 0.12);\\n      --amber: #f59e0b;\\n      --amber-subtle: rgba(245, 158, 11, 0.12);\\n      --rose: #f43f5e;\\n      --rose-subtle: rgba(244, 63, 94, 0.12);\\n    }\\n\\n    * {\\n      box-sizing: border-box;\\n      margin: 0;\\n      padding: 0;\\n      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\\n      -webkit-tap-highlight-color: transparent;\\n    }\\n\\n    body {\\n      background: var(--bg);\\n      color: var(--text-primary);\\n      min-height: 100vh;\\n      display: flex;\\n      justify-content: center;\\n      align-items: center;\\n      padding: 24px 16px;\\n      line-height: 1.5;\\n    }\\n\\n    .app-shell {\\n      width: 100%;\\n      max-width: 440px;\\n      background: var(--surface);\\n      border: 1px solid var(--border);\\n      border-radius: 24px;\\n      overflow: hidden;\\n      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);\\n    }\\n\\n    /* Top App Bar */\\n    .app-header {\\n      padding: 20px 24px;\\n      background: var(--surface);\\n      border-bottom: 1px solid var(--border);\\n      display: flex;\\n      justify-content: space-between;\\n      align-items: center;\\n    }\\n\\n    .brand {\\n      display: flex;\\n      align-items: center;\\n      gap: 12px;\\n    }\\n\\n    .brand-mark {\\n      width: 36px;\\n      height: 36px;\\n      background: linear-gradient(135deg, #1d4ed8, #2563eb);\\n      border-radius: 10px;\\n      display: flex;\\n      align-items: center;\\n      justify-content: center;\\n      color: #fff;\\n    }\\n\\n    .brand-title {\\n      font-size: 0.95rem;\\n      font-weight: 700;\\n      letter-spacing: -0.02em;\\n      color: #fff;\\n    }\\n\\n    .brand-subtitle {\\n      font-size: 0.72rem;\\n      color: var(--text-tertiary);\\n      text-transform: uppercase;\\n      letter-spacing: 0.05em;\\n      font-weight: 600;\\n    }\\n\\n    .connection-pill {\\n      display: flex;\\n      align-items: center;\\n      gap: 6px;\\n      padding: 4px 10px;\\n      background: var(--emerald-subtle);\\n      border: 1px solid rgba(16, 185, 129, 0.25);\\n      border-radius: 20px;\\n      font-size: 0.7rem;\\n      font-weight: 600;\\n      color: #34d399;\\n    }\\n\\n    .connection-dot {\\n      width: 6px;\\n      height: 6px;\\n      border-radius: 50%;\\n      background: #10b981;\\n      box-shadow: 0 0 8px #10b981;\\n    }\\n\\n    /* Dev Config Drawer */\\n    .config-trigger {\\n      padding: 10px 24px;\\n      background: rgba(255, 255, 255, 0.02);\\n      border-bottom: 1px solid var(--border);\\n      font-size: 0.75rem;\\n      color: var(--text-tertiary);\\n      display: flex;\\n      justify-content: space-between;\\n      align-items: center;\\n      cursor: pointer;\\n    }\\n\\n    .config-trigger:hover {\\n      background: rgba(255, 255, 255, 0.04);\\n      color: var(--text-secondary);\\n    }\\n\\n    .config-body {\\n      display: none;\\n      padding: 16px 24px;\\n      background: var(--surface-elevated);\\n      border-bottom: 1px solid var(--border);\\n    }\\n\\n    .config-body.open {\\n      display: block;\\n    }\\n\\n    .config-input {\\n      width: 100%;\\n      background: var(--bg);\\n      border: 1px solid var(--border);\\n      border-radius: 8px;\\n      padding: 8px 12px;\\n      font-size: 0.78rem;\\n      color: var(--text-secondary);\\n      font-family: monospace;\\n      outline: none;\\n    }\\n\\n    /* Main Form */\\n    .form-container {\\n      padding: 24px;\\n      display: flex;\\n      flex-direction: column;\\n      gap: 20px;\\n    }\\n\\n    .section-label {\\n      font-size: 0.7rem;\\n      font-weight: 700;\\n      text-transform: uppercase;\\n      letter-spacing: 0.08em;\\n      color: var(--text-tertiary);\\n      margin-bottom: -10px;\\n    }\\n\\n    .field-group {\\n      display: flex;\\n      flex-direction: column;\\n      gap: 6px;\\n    }\\n\\n    .field-group label {\\n      font-size: 0.8rem;\\n      font-weight: 500;\\n      color: var(--text-secondary);\\n      display: flex;\\n      justify-content: space-between;\\n    }\\n\\n    .field-group label span.meta {\\n      font-size: 0.7rem;\\n      color: var(--text-tertiary);\\n      font-weight: 400;\\n    }\\n\\n    .input-control {\\n      width: 100%;\\n      background: var(--surface-elevated);\\n      border: 1px solid var(--border);\\n      border-radius: 12px;\\n      padding: 12px 14px;\\n      font-size: 0.88rem;\\n      color: var(--text-primary);\\n      transition: all 0.15s ease;\\n      outline: none;\\n    }\\n\\n    .input-control:focus {\\n      border-color: var(--border-focus);\\n      background: #1e2230;\\n      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);\\n    }\\n\\n    select.input-control {\\n      appearance: none;\\n      background-image: url(\\\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\\\");\\n      background-repeat: no-repeat;\\n      background-position: right 14px center;\\n      cursor: pointer;\\n    }\\n\\n    textarea.input-control {\\n      resize: vertical;\\n      min-height: 72px;\\n    }\\n\\n    /* Grid layout for Driver + Plate */\\n    .field-row {\\n      display: grid;\\n      grid-template-columns: 1fr 1fr;\\n      gap: 12px;\\n    }\\n\\n    /* Document Capture Area */\\n    .dropzone {\\n      border: 1px dashed #3a4157;\\n      background: rgba(26, 29, 40, 0.4);\\n      border-radius: 14px;\\n      padding: 20px;\\n      text-align: center;\\n      position: relative;\\n      cursor: pointer;\\n      transition: all 0.2s ease;\\n    }\\n\\n    .dropzone:hover {\\n      border-color: var(--accent);\\n      background: rgba(37, 99, 235, 0.04);\\n    }\\n\\n    .dropzone input[type=\\\"file\\\"] {\\n      position: absolute;\\n      inset: 0;\\n      opacity: 0;\\n      cursor: pointer;\\n    }\\n\\n    .dropzone-icon {\\n      width: 40px;\\n      height: 40px;\\n      background: rgba(255, 255, 255, 0.04);\\n      border-radius: 10px;\\n      display: inline-flex;\\n      align-items: center;\\n      justify-content: center;\\n      color: var(--text-secondary);\\n      margin-bottom: 8px;\\n    }\\n\\n    .dropzone-text {\\n      font-size: 0.82rem;\\n      font-weight: 500;\\n      color: var(--text-primary);\\n    }\\n\\n    .dropzone-hint {\\n      font-size: 0.72rem;\\n      color: var(--text-tertiary);\\n      margin-top: 2px;\\n    }\\n\\n    .image-preview-container {\\n      display: none;\\n      position: relative;\\n      margin-top: 12px;\\n      border-radius: 10px;\\n      overflow: hidden;\\n      border: 1px solid var(--border);\\n    }\\n\\n    .image-preview {\\n      width: 100%;\\n      max-height: 180px;\\n      object-fit: cover;\\n      display: block;\\n    }\\n\\n    .remove-image-btn {\\n      position: absolute;\\n      top: 8px;\\n      right: 8px;\\n      background: rgba(15, 23, 42, 0.85);\\n      border: 1px solid rgba(255, 255, 255, 0.1);\\n      border-radius: 6px;\\n      padding: 4px 8px;\\n      color: #fff;\\n      font-size: 0.7rem;\\n      cursor: pointer;\\n      display: flex;\\n      align-items: center;\\n      gap: 4px;\\n    }\\n\\n    /* Primary Action Button */\\n    .btn-action {\\n      background: var(--accent);\\n      color: #fff;\\n      border: none;\\n      border-radius: 12px;\\n      padding: 14px 20px;\\n      font-size: 0.9rem;\\n      font-weight: 600;\\n      cursor: pointer;\\n      display: flex;\\n      align-items: center;\\n      justify-content: center;\\n      gap: 8px;\\n      transition: all 0.15s ease;\\n      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);\\n      margin-top: 4px;\\n    }\\n\\n    .btn-action:hover {\\n      background: var(--accent-hover);\\n      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);\\n    }\\n\\n    .btn-action:active {\\n      transform: scale(0.99);\\n    }\\n\\n    .btn-action:disabled {\\n      background: #272b3a;\\n      color: var(--text-tertiary);\\n      cursor: not-allowed;\\n      box-shadow: none;\\n    }\\n\\n    /* Feedback Banner */\\n    .banner {\\n      display: none;\\n      padding: 12px 16px;\\n      border-radius: 10px;\\n      font-size: 0.82rem;\\n      align-items: center;\\n      gap: 10px;\\n    }\\n\\n    .banner.success {\\n      background: var(--emerald-subtle);\\n      border: 1px solid rgba(16, 185, 129, 0.3);\\n      color: #34d399;\\n    }\\n\\n    .banner.error {\\n      background: var(--rose-subtle);\\n      border: 1px solid rgba(244, 63, 94, 0.3);\\n      color: #fb7185;\\n    }\\n\\n    .spinner {\\n      width: 16px;\\n      height: 16px;\\n      border: 2px solid rgba(255, 255, 255, 0.2);\\n      border-top-color: #fff;\\n      border-radius: 50%;\\n      animation: spin 0.6s linear infinite;\\n    }\\n\\n    @keyframes spin {\\n      to { transform: rotate(360deg); }\\n    }\\n  </style>\\n</head>\\n<body>\\n\\n  <div class=\\\"app-shell\\\">\\n    <!-- Header -->\\n    <header class=\\\"app-header\\\">\\n      <div class=\\\"brand\\\">\\n        <div class=\\\"brand-mark\\\">\\n          <svg width=\\\"20\\\" height=\\\"20\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2.2\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\">\\n            <rect x=\\\"1\\\" y=\\\"3\\\" width=\\\"15\\\" height=\\\"13\\\"></rect>\\n            <polygon points=\\\"16 8 20 8 23 11 23 16 16 16 16 8\\\"></polygon>\\n            <circle cx=\\\"5.5\\\" cy=\\\"18.5\\\" r=\\\"2.5\\\"></circle>\\n            <circle cx=\\\"18.5\\\" cy=\\\"18.5\\\" r=\\\"2.5\\\"></circle>\\n          </svg>\\n        </div>\\n        <div>\\n          <div class=\\\"brand-title\\\">Ricky Kargo Flow</div>\\n          <div class=\\\"brand-subtitle\\\">Field Logistics e-POD</div>\\n        </div>\\n      </div>\\n      <div class=\\\"connection-pill\\\">\\n        <div class=\\\"connection-dot\\\"></div>\\n        Ready\\n      </div>\\n    </header>\\n\\n    <!-- Collapsible Webhook Settings for Dev -->\\n    <div class=\\\"config-trigger\\\" onclick=\\\"toggleConfig()\\\">\\n      <span>Dispatcher Endpoint: <strong style=\\\"color:#94a3b8;\\\" id=\\\"endpointLabel\\\">/webhook-test/driver-pod</strong></span>\\n      <svg width=\\\"14\\\" height=\\\"14\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2\\\"><path d=\\\"m6 9 6 6 6-6\\\"/></svg>\\n    </div>\\n    <div class=\\\"config-body\\\" id=\\\"configDrawer\\\">\\n      <label style=\\\"font-size:0.72rem; color:var(--text-tertiary); display:block; margin-bottom:6px;\\\">Target Webhook URL</label>\\n      <input type=\\\"text\\\" id=\\\"webhookUrl\\\" class=\\\"config-input\\\" value=\\\"http://localhost:5678/webhook-test/driver-pod\\\">\\n    </div>\\n\\n    <!-- Form Body -->\\n    <form id=\\\"podForm\\\" class=\\\"form-container\\\">\\n      <div class=\\\"section-label\\\">1. Identifikasi Dokumen</div>\\n\\n      <div class=\\\"field-group\\\">\\n        <label for=\\\"doNumber\\\">\\n          Nomor Surat Jalan (DO / BAP)\\n          <span class=\\\"meta\\\">Wajib</span>\\n        </label>\\n        <input type=\\\"text\\\" id=\\\"doNumber\\\" class=\\\"input-control\\\" value=\\\"SJ-2026-1049\\\" placeholder=\\\"Contoh: SJ-2026-1049\\\" required>\\n      </div>\\n\\n      <div class=\\\"field-row\\\">\\n        <div class=\\\"field-group\\\">\\n          <label for=\\\"driverName\\\">Nama Supir</label>\\n          <input type=\\\"text\\\" id=\\\"driverName\\\" class=\\\"input-control\\\" value=\\\"Budi Santoso\\\" required>\\n        </div>\\n        <div class=\\\"field-group\\\">\\n          <label for=\\\"vehiclePlate\\\">Plat Armada</label>\\n          <input type=\\\"text\\\" id=\\\"vehiclePlate\\\" class=\\\"input-control\\\" value=\\\"B 9821 TXX\\\" required>\\n        </div>\\n      </div>\\n\\n      <div class=\\\"section-label\\\" style=\\\"margin-top:8px;\\\">2. Verifikasi Serah Terima</div>\\n\\n      <div class=\\\"field-group\\\">\\n        <label for=\\\"recipient\\\">Penerima & Gudang Tujuan</label>\\n        <input type=\\\"text\\\" id=\\\"recipient\\\" class=\\\"input-control\\\" value=\\\"DC Cibitung - Pak Joko (PIC)\\\" required>\\n      </div>\\n\\n      <div class=\\\"field-group\\\">\\n        <label for=\\\"deliveryStatus\\\">Status Kondisi Fisik</label>\\n        <select id=\\\"deliveryStatus\\\" class=\\\"input-control\\\">\\n          <option value=\\\"DELIVERED_INTACT\\\">Tuntas \\u2014 Kondisi Utuh & Sesuai Manifest</option>\\n          <option value=\\\"DELIVERED_DISCREPANCY\\\">Tuntas \\u2014 Terdapat Selisih / Kerusakan Koli</option>\\n          <option value=\\\"REJECTED_AT_SITE\\\">Gagal \\u2014 Ditolak Gudang / Luar Jam Operasional</option>\\n        </select>\\n      </div>\\n\\n      <div class=\\\"field-group\\\">\\n        <label>\\n          Foto Bukti Tanda Tangan & Cap Basah\\n          <span class=\\\"meta\\\">Lampiran Dokumen</span>\\n        </label>\\n        <div class=\\\"dropzone\\\" id=\\\"dropArea\\\">\\n          <input type=\\\"file\\\" id=\\\"fileInput\\\" accept=\\\"image/*\\\">\\n          <div class=\\\"dropzone-icon\\\">\\n            <svg width=\\\"20\\\" height=\\\"20\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\">\\n              <path d=\\\"M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z\\\"></path>\\n              <circle cx=\\\"12\\\" cy=\\\"13\\\" r=\\\"4\\\"></circle>\\n            </svg>\\n          </div>\\n          <div class=\\\"dropzone-text\\\" id=\\\"dropzonePrompt\\\">Ambil Foto / Pilih Dokumen</div>\\n          <div class=\\\"dropzone-hint\\\">Format JPG, PNG (Maksimal 5MB)</div>\\n        </div>\\n\\n        <div class=\\\"image-preview-container\\\" id=\\\"previewContainer\\\">\\n          <img id=\\\"imagePreview\\\" class=\\\"image-preview\\\" alt=\\\"Preview POD\\\">\\n          <button type=\\\"button\\\" class=\\\"remove-image-btn\\\" onclick=\\\"removeImage()\\\">\\n            <svg width=\\\"12\\\" height=\\\"12\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2\\\"><line x1=\\\"18\\\" y1=\\\"6\\\" x2=\\\"6\\\" y2=\\\"18\\\"></line><line x1=\\\"6\\\" y1=\\\"6\\\" x2=\\\"18\\\" y2=\\\"18\\\"></line></svg>\\n            Hapus\\n          </button>\\n        </div>\\n      </div>\\n\\n      <div class=\\\"field-group\\\">\\n        <label for=\\\"notes\\\">Catatan Bongkar Muat</label>\\n        <textarea id=\\\"notes\\\" class=\\\"input-control\\\" placeholder=\\\"Contoh: Bongkar di bay 3, diterima lengkap 50 koli.\\\">Diterima lengkap 50 koli, stempel basah gudang terverifikasi.</textarea>\\n      </div>\\n\\n      <button type=\\\"submit\\\" id=\\\"submitBtn\\\" class=\\\"btn-action\\\">\\n        <span>Kirim Verifikasi e-POD</span>\\n        <svg width=\\\"16\\\" height=\\\"16\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"><line x1=\\\"5\\\" y1=\\\"12\\\" x2=\\\"19\\\" y2=\\\"12\\\"></line><polyline points=\\\"12 5 19 12 12 19\\\"></polyline></svg>\\n      </button>\\n\\n      <div id=\\\"banner\\\" class=\\\"banner\\\"></div>\\n    </form>\\n  </div>\\n\\n  <script>\\n    let photoBase64 = null;\\n    const fileInput = document.getElementById('fileInput');\\n    const previewContainer = document.getElementById('previewContainer');\\n    const imagePreview = document.getElementById('imagePreview');\\n    const dropArea = document.getElementById('dropArea');\\n    const banner = document.getElementById('banner');\\n    const submitBtn = document.getElementById('submitBtn');\\n    const form = document.getElementById('podForm');\\n\\n    // Auto-detect Webhook URL if opened via Cloudflare Tunnel / Web Server\\n    if (window.location.protocol.startsWith('http')) {\\n      const autoUrl = window.location.origin + '/webhook/driver-pod';\\n      document.getElementById('webhookUrl').value = autoUrl;\\n      const label = document.getElementById('endpointLabel');\\n      if (label) label.textContent = '/webhook/driver-pod';\\n    }\\n\\n    function toggleConfig() {\\n      const drawer = document.getElementById('configDrawer');\\n      drawer.classList.toggle('open');\\n    }\\n\\n    fileInput.addEventListener('change', (e) => {\\n      const file = e.target.files[0];\\n      if (file) {\\n        const reader = new FileReader();\\n        reader.onload = (event) => {\\n          photoBase64 = event.target.result;\\n          imagePreview.src = photoBase64;\\n          previewContainer.style.display = 'block';\\n          dropArea.style.display = 'none';\\n        };\\n        reader.readAsDataURL(file);\\n      }\\n    });\\n\\n    function removeImage() {\\n      photoBase64 = null;\\n      fileInput.value = '';\\n      previewContainer.style.display = 'none';\\n      dropArea.style.display = 'block';\\n    }\\n\\n    form.addEventListener('submit', async (e) => {\\n      e.preventDefault();\\n\\n      const webhookUrl = document.getElementById('webhookUrl').value.trim();\\n      const payload = {\\n        do_number: document.getElementById('doNumber').value.trim(),\\n        driver_name: document.getElementById('driverName').value.trim(),\\n        vehicle_plate: document.getElementById('vehiclePlate').value.trim(),\\n        recipient: document.getElementById('recipient').value.trim(),\\n        status: document.getElementById('deliveryStatus').value,\\n        notes: document.getElementById('notes').value.trim(),\\n        has_photo: !!photoBase64,\\n        photo_base64: photoBase64 || null,\\n        submitted_at: new Date().toISOString()\\n      };\\n\\n      submitBtn.disabled = true;\\n      submitBtn.innerHTML = '<div class=\\\"spinner\\\"></div><span>Memproses ke n8n Dispatch...</span>';\\n\\n      try {\\n        const res = await fetch(webhookUrl, {\\n          method: 'POST',\\n          headers: { 'Content-Type': 'application/json' },\\n          body: JSON.stringify(payload)\\n        });\\n\\n        if (res.ok) {\\n          let serverMsg = 'e-POD berhasil dikirim ke n8n Dispatch System!';\\n          try {\\n            const data = await res.json();\\n            if (data && data.message) {\\n              serverMsg = `\\u2713 ${data.message} [ID: #${data.delivery_id || '-'}]`;\\n            }\\n          } catch(e) {}\\n          showBanner(serverMsg, 'success');\\n        } else {\\n          showBanner(`Server merespon status: ${res.status}`, 'error');\\n        }\\n      } catch (err) {\\n        showBanner('Gagal terhubung ke Webhook n8n. Pastikan node Webhook sedang \\\"Listen for test event\\\".', 'error');\\n      } finally {\\n        submitBtn.disabled = false;\\n        submitBtn.innerHTML = '<span>Kirim Verifikasi e-POD</span><svg width=\\\"16\\\" height=\\\"16\\\" viewBox=\\\"0 0 24 24\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"2.5\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"><line x1=\\\"5\\\" y1=\\\"12\\\" x2=\\\"19\\\" y2=\\\"12\\\"></line><polyline points=\\\"12 5 19 12 12 19\\\"></polyline></svg>';\\n      }\\n    });\\n\\n    function showBanner(text, type) {\\n      banner.className = `banner ${type}`;\\n      banner.style.display = 'flex';\\n      banner.textContent = text;\\n      setTimeout(() => {\\n        banner.style.display = 'none';\\n      }, 5000);\\n    }\\n  </script>\\n</body>\\n</html>\\n\" } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        240
+      ],
+      "id": "a1111111-2222-3333-4444-555555555552",
+      "name": "Code Portal HTML"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ .html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        240
+      ],
+      "id": "a1111111-2222-3333-4444-555555555553",
+      "name": "Respond with Portal HTML"
+    }
+  ],
+  "connections": {
+    "Webhook POD": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Upload POD File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload POD File": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Portal": {
+      "main": [
+        [
+          {
+            "node": "Code Portal HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Portal HTML": {
+      "main": [
+        [
+          {
+            "node": "Respond with Portal HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "8i0GeVApbGgoqVs7",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-12T14:43:47.653Z",
+      "updatedAt": "2026-10-12T14:43:47.653Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "86223a77-0768-41ac-b76c-166bf2320dd2",
+    "workflowId": "8i0GeVApbGgoqVs7",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "driver-pod",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "edd5b748-657a-4350-88e2-dd4c606650ac",
+        "name": "Webhook POD",
+        "webhookId": "891a6d6b-50c4-4961-8c05-44694ca82b3d"
+      },
+      {
+        "parameters": {
+          "tableId": "deliveries",
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "do_number",
+                "fieldValue": "={{ $json.body.do_number }}"
+              },
+              {
+                "fieldId": "driver_name",
+                "fieldValue": "={{ $json.body.driver_name }}"
+              },
+              {
+                "fieldId": "vehicle_plate",
+                "fieldValue": "={{ $json.body.vehicle_plate }}"
+              },
+              {
+                "fieldId": "recipient",
+                "fieldValue": "={{ $json.body.recipient }}"
+              },
+              {
+                "fieldId": "status",
+                "fieldValue": "={{ $json.body.status }}"
+              },
+              {
+                "fieldId": "notes",
+                "fieldValue": "= {{ $json.body.notes }}"
+              },
+              {
+                "fieldId": "has_photo",
+                "fieldValue": "={{ $json.body.has_photo }}"
+              },
+              {
+                "fieldId": "submitted_at",
+                "fieldValue": "={{ $json.body.submitted_at }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          256,
+          0
+        ],
+        "id": "4b6f89bd-6117-4bff-aefc-77e88bbdad25",
+        "name": "Create a row",
+        "credentials": {
+          "supabaseApi": {
+            "id": "1uPFDyXdNAbMDRYf",
+            "name": "Supabase account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {
+            "responseCode": 200
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          992,
+          0
+        ],
+        "id": "f4595b8f-eaa5-47e5-9d12-cf998c32e2b0",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Ambil foto dari node 'Webhook POD'\nlet photoBase64 = null;\ntry {\n  photoBase64 = $('Webhook POD').first().json.body?.photo_base64;\n} catch (err) {\n  // Abaikan jika tidak ketemu\n}\n\n// 2. Jika supir tidak melampirkan foto saat tes, gunakan sample image agar tidak error\nif (!photoBase64) {\n  photoBase64 = \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\";\n}\n\n// 3. Bersihkan prefix Base64\nconst cleanBase64 = photoBase64.replace(/^data:image\\/\\w+;base64,/, '');\nconst doNumber = $input.item.json.do_number || 'SJ-2026';\n\n// 4. Return data JSON + binary data untuk Google Drive\nreturn {\n  json: $input.item.json,\n  binary: {\n    data: {\n      data: cleanBase64,\n      mimeType: \"image/png\",\n      fileName: `POD_${doNumber}_${Date.now()}.png`\n    }\n  }\n};\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          496,
+          0
+        ],
+        "id": "99e77b4c-7866-4b08-a5fd-4a938b2211fa",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "driveId": {
+            "__rl": true,
+            "value": "My Drive",
+            "mode": "list",
+            "cachedResultName": "My Drive",
+            "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "19nng5X-cPZC10Ke346xzCoBw1s9XeLnh",
+            "mode": "id"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          736,
+          0
+        ],
+        "id": "51828c19-a940-4943-aa97-0ff9c311f78b",
+        "name": "Upload POD File",
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "bnZ5mcdT3JivbX5E",
+            "name": "Google Drive account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook POD": {
+        "main": [
+          [
+            {
+              "node": "Create a row",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create a row": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Respond to Webhook": {
+        "main": [
+          []
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Upload POD File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload POD File": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mohammad Ricky",
+    "name": null,
+    "description": null,
+    "autosaved": true,
+    "createdAt": "2026-10-13T00:57:46.273Z",
+    "updatedAt": "2026-10-13T00:57:46.273Z"
+  }
+}
