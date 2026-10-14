@@ -1,0 +1,406 @@
+{
+  "id": "Piz0DA7LLf5ezPRV",
+  "name": "WF Belajar 3 Google Sheet an LLM Conditional Trigger",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-08T02:14:27.601Z",
+  "updatedAt": "2026-10-08T07:03:38.828Z",
+  "isArchived": false,
+  "versionId": "d03776c2-2765-43b7-8175-53c363bc58c2",
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Feedback Customer",
+        "formDescription": "Bantu kami menjadi lebih baik dengan feedback\nkamu",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Pesan",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Tanggal",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "respondWith": "redirect",
+              "redirectUrl": "http://localhost:5678/form/81252332-fd07-42f6-aa56-4d40d4975941"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        32
+      ],
+      "id": "e8827f8a-97ae-4ff0-b794-2a061f6cf3bd",
+      "name": "On form submission",
+      "webhookId": "81252332-fd07-42f6-aa56-4d40d4975941"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10aa6f7a-c220-4f8e-990a-4ab6fe6ba123",
+              "name": "name",
+              "value": "={{ $('On form submission').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "a184f861-5549-40b0-9858-b4e8c8ea431a",
+              "name": "email",
+              "value": "={{ $(\"On form submission\").item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "7b5c3f64-d082-4482-9b07-25943e9f82cc",
+              "name": "pesan",
+              "value": "={{ $(\"On form submission\").item.json.Pesan }}",
+              "type": "string"
+            },
+            {
+              "id": "cd89b48f-099b-4da4-84b6-efe1cfe3adac",
+              "name": "=sentimen",
+              "value": "={{ $json.text.split(\"\\n\")[0].replace(\"Sentimen: \", \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "61d27354-6db2-46e3-a893-f088af6f2e6c",
+              "name": "kategori",
+              "value": "={{ $json.text.split(\"\\n\")[1].replace(\"Kategori: \", \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "3de85cdd-940d-4eea-86ec-f1d306499a76",
+              "name": "tanggal",
+              "value": "={{ $now.format(\"yyyy-MM-dd HH:mm\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        416,
+        32
+      ],
+      "id": "4bb20dd7-425e-4fc1-aa50-cfaf6f1435d2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1p7ztd0mffzlYq9VojwCFZPa-tqQTkV0m2ygOMjuRte0/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p7ztd0mffzlYq9VojwCFZPa-tqQTkV0m2ygOMjuRte0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nama": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Pesan": "={{ $json.pesan }}",
+            "Tanggal": "={{ $json.tanggal }}",
+            "Sentimen": "={{ $json.sentimen }}",
+            "Kategori": "={{ $json.kategori }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nama",
+              "displayName": "Nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pesan",
+              "displayName": "Pesan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sentimen",
+              "displayName": "Sentimen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kategori",
+              "displayName": "Kategori",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tanggal",
+              "displayName": "Tanggal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1312,
+        64
+      ],
+      "id": "5f0abc08-bda5-4f1a-8564-45ea2f415b7c",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analisis feedback customer berikut. Jawab HANYA\ndalam format ini, tidak boleh ada teks lain:\nSentimen: [Positif/Negatif/Netral]\nKategori: [Produk/Pengiriman/Customer Service/Harga/Lainnya]\nFeedback:\n{{ $json.Pesan }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        48,
+        32
+      ],
+      "id": "e0099324-f1d2-4f97-ba4a-22a43a584aa7",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        240
+      ],
+      "id": "25d39628-0541-498f-a781-792bee8a7e35",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b52fa9a9-33e5-4c14-a48a-b29ad38d3192",
+              "leftValue": "={{ $json.sentimen }}",
+              "rightValue": "Negatif",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        48
+      ],
+      "id": "1ac976e2-c466-4761-8232-c71ba2772f19",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "mricky.it@gmail.com",
+        "toEmail": "ricky.kuasep@gmail.com",
+        "subject": "=[Alert] Feedback negatif dari : {{ $('Edit Fields').item.json.name }}",
+        "html": "=Ada feedback negatif yang perlu ditindaklanjuti :\nNama : {{ $json.name }} Email : {{ $json.email }}\nKategori : {{ $json.kategori }} Waktu : {{ $json.tanggal }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        912,
+        -240
+      ],
+      "id": "fddca449-b51d-4f6d-bab1-21b59498af98",
+      "name": "Send an Email",
+      "webhookId": "d704c881-4b1b-43a0-8044-a568b1d3c3f2",
+      "credentials": {
+        "smtp": {
+          "id": "wy9Q0wNZZHJ5BP2I",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Piz0DA7LLf5ezPRV",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-08T02:14:27.601Z",
+      "updatedAt": "2026-10-08T02:14:27.601Z"
+    }
+  ],
+  "activeVersion": null
+}
