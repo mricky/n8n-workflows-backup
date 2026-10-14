@@ -1,0 +1,32 @@
+{
+  "id": "Fxdn8s3ZOf3yFeHc",
+  "name": "WAHA WhatsApp Auto-Responder Starter",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-08-31T18:24:47.030Z",
+  "updatedAt": "2026-08-31T18:25:09.749Z",
+  "isArchived": false,
+  "versionId": "5a115091-b7ee-4f5b-9bbf-e96ec1ec38bb",
+  "triggerCount": 0,
+  "nodes": [],
+  "connections": {},
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Fxdn8s3ZOf3yFeHc",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-08-31T18:24:47.030Z",
+      "updatedAt": "2026-08-31T18:24:47.030Z"
+    }
+  ],
+  "activeVersion": null
+}
