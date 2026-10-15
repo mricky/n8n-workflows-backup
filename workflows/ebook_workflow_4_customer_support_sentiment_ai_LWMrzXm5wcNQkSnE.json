@@ -1,0 +1,479 @@
+{
+  "id": "LWMrzXm5wcNQkSnE",
+  "name": "Ebook Workflow 4 Customer Support Sentiment AI",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-15T02:41:50.487Z",
+  "updatedAt": "2026-10-15T04:53:12.039Z",
+  "isArchived": false,
+  "versionId": "e2fa09fe-9dd2-4010-bd43-34b76876269b",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Formulir Bantuan & Layanan Pelanggan",
+        "formDescription": "Ada kendala dengan pesanan Anda? Ceritakan di sini, tim kami siap membantu.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nama Pelanggan "
+            },
+            {
+              "fieldLabel": "Email Pelanggan",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Nomor WhatsApp",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Jenis Kendala",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Kerusakan Barang Fisik"
+                  },
+                  {
+                    "option": "Keterlambatan Pengiriman"
+                  },
+                  {
+                    "option": "Pertanyaan Informasi Produk"
+                  },
+                  {
+                    "option": "Lainnya"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Pesan Keluhan / Pertanyaan",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "34e95956-06c3-41ca-addc-7c68eb2a00dc",
+      "name": "On form submission",
+      "webhookId": "ad7c63d3-09a5-4c35-bd11-b9d8b0121778"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Senior Crisis Management & Customer Experience Specialist di perusahaan layanan pelanggan dan e-commerce.\nTugas utamamu adalah menganalisis keluhan pelanggan yang masuk, mendeteksi tingkat emosi/kemarahan (skor 1-10), menentukan status urgensi, dan menyusun draf balasan resmi yang sangat berempati.\n\nDATA MASUK DARI FORMULIR:\n- Nama: {{ $('On form submission').item.json['Nama Pelanggan'] }}\n- Email: {{ $('On form submission').item.json['Email Pelanggan'] }}\n- WhatsApp: {{ $('On form submission').item.json['Nomor WhatsApp'] }}\n- Kategori: {{ $('On form submission').item.json['Jenis Kendala'] }}\n- Pesan: {{ $('On form submission').item.json['Pesan Keluhan / Pertanyaan'] }}\n\nPANDUAN PENILAIAN:\n1. SKOR KEMARAHAN (1 - 10):\n   - 1 sampai 4: Pertanyaan ramah, kendala minor, nada bicara santai (NORMAL).\n   - 5 sampai 6: Nada kesal karena keterlambatan, tapi masih sopan (PERHATIAN KHUSUS).\n   - 7 sampai 10: SANGAT MARAH, menggunakan huruf besar, kata-kata kasar, atau ancaman lapor polisi/viral medsos (DARURAT).\n\n2. STATUS URGENSI:\n   - Jika skor >= 7: \"🚨 DARURAT (HIGH RISK)\"\n   - Jika skor 5 - 6: \"🟡 PERHATIAN KHUSUS\"\n   - Jika skor 1 - 4: \"🟢 NORMAL / STANDAR\"\n\n3. DRAF BALASAN EMPATI:\n   Tuliskan 1 paragraf balasan email resmi yang memohon maaf secara tulus atas ketidaknyamanan {{ $('On form submission').item.json['Nama Pelanggan'] }}, menyatakan bahwa kendala sedang ditangani prioritas oleh manajemen, dan solusi sedang disiapkan.\n\nATURAN OUTPUT:\nKeluarkan HANYA JSON murni tanpa awalan markdown seperti ```json atau tanda kutip tambahan:\n{\n  \"skor\": 9,\n  \"status_urgensi\": \"🚨 DARURAT (HIGH RISK)\",\n  \"ringkasan_masalah\": \"Barang rusak parah dan cairan tumpah merusak dokumen kantor penting pelanggan.\",\n  \"draf_balasan\": \"Halo Bapak/Ibu {{ $('On form submission').item.json['Nama Pelanggan'] }}, kami memohon maaf yang sebesar-besarnya atas kendala tidak menyenangkan yang Anda alami. Laporan Anda saat ini sudah dieskalasikan langsung ke meja pimpinan operasional kami untuk investigasi darurat dan kompensasi penggantian penuh. Tim kami akan segera menghubungi Anda dalam waktu maksimal 30 menit ke depan.\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        0
+      ],
+      "id": "2fe18303-b369-41a8-b17b-e16650767f55",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        208
+      ],
+      "id": "6e828379-9576-4410-b330-5dcc2111d19a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed75b8be-cce4-4e9e-a362-f8b2dd78fef6",
+              "name": "id_tiket",
+              "value": "={{ 'TIKET-' + $now.format('yyyyMMdd') + '-' + Math.floor(1000 + Math.random() * 9000) }}",
+              "type": "string"
+            },
+            {
+              "id": "78ed3b28-4766-4907-ba43-548d329bd24f",
+              "name": "skor ",
+              "value": "={{ JSON.parse($json.text).skor }}",
+              "type": "string"
+            },
+            {
+              "id": "c0cada66-e94f-4e32-938d-37598abbccf0",
+              "name": "status_urgensi",
+              "value": "={{ JSON.parse($json.text).status_urgensi }}",
+              "type": "string"
+            },
+            {
+              "id": "cd8c635b-dac8-4148-9ffa-6c27b3259bf1",
+              "name": "ringkasan_masalah",
+              "value": "={{ JSON.parse($json.text).ringkasan_masalah }}",
+              "type": "string"
+            },
+            {
+              "id": "b987c486-ca05-4f02-a0ab-feced20e61a1",
+              "name": "draf_balasan",
+              "value": "={{ JSON.parse($json.text).draf_balasan }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        0
+      ],
+      "id": "e5cf983b-a2ae-4783-b631-a6f12a2ccb43",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1xUEzhU_cYnMRgTmb5csIplMQn_XWkAxkF4xA6w6qF8I/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xUEzhU_cYnMRgTmb5csIplMQn_XWkAxkF4xA6w6qF8I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Waktu Masuk": "={{ $now.format('yyyy-MM-dd HH:mm') }}",
+            "ID Tiket": "={{ $json.id_tiket }}",
+            "Nama Pelanggan": "={{ $('On form submission').item.json['Nama Pelanggan '] }}",
+            "Email": "={{ $('On form submission').item.json['Email Pelanggan'] }}",
+            "WhatsApp": "={{ $('On form submission').item.json['Nomor WhatsApp'] }}",
+            "Kategori Kendala": "={{ $('On form submission').item.json['Jenis Kendala'] }}",
+            "Pesan Keluhan": "={{ $('On form submission').item.json['Pesan Keluhan / Pertanyaan'] }}",
+            "Draf Balasan AI": "={{ $json.draf_balasan }}",
+            "Status Urgensi": "={{ $json.status_urgensi }}",
+            "Skor Kemarahan": "={{ String($json['skor ']) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Waktu Masuk",
+              "displayName": "Waktu Masuk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ID Tiket",
+              "displayName": "ID Tiket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nama Pelanggan",
+              "displayName": "Nama Pelanggan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kategori Kendala",
+              "displayName": "Kategori Kendala",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pesan Keluhan",
+              "displayName": "Pesan Keluhan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skor Kemarahan",
+              "displayName": "Skor Kemarahan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status Urgensi",
+              "displayName": "Status Urgensi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Draf Balasan AI",
+              "displayName": "Draf Balasan AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        0
+      ],
+      "id": "82045436-d218-46c9-9d3d-0f3239d8daf1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ Number($json['Skor Kemarahan']) }}",
+                    "rightValue": "={{ 7 }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "b1b74899-9cf6-4e10-a518-fdb332731bf4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DARURAT (Skor >= 7)"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "allMatchingOutputs": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "9f78778b-384e-4284-8aae-7bde0ee3ea6c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "fromEmail": "mricky.it@gmail.com",
+        "toEmail": "{{ $('On form submission').item.json['Email Pelanggan'] }}",
+        "subject": "=[TIKET {{ $('Edit Fields').item.json.id_tiket }} Konfirmasi Pengaduan Layanan Pelanggan",
+        "html": "=Halo Bapak/Ibu {{ $('On form submission').item.json['Nama Pelanggan '] }}\nTerima kasih telah menghubungi kami. Laporan/pertanyaan Anda mengenai \"{{ $('On form submission').item.json['Jenis Kendala'] }}\" telah berhasil kami terima.\n\nNomor Tiket: {{ $('Edit Fields').item.json.id_tiket }}\nWaktu Masuk: {{ $now.format('yyyy-MM-dd HH:mm') }} WIB\n\nTim Customer Service kami akan meninjau dan memberikan tanggapan dalam 1x24 jam kerja.\n\nSalam hangat,\nCustomer Support Team\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1296,
+        160
+      ],
+      "id": "89da2140-4b0e-499e-8e34-f5d42ff20ee9",
+      "name": "Send an Email",
+      "webhookId": "6fc3be6b-6f97-4d53-87fe-c9bec9b00e00",
+      "credentials": {
+        "smtp": {
+          "id": "wy9Q0wNZZHJ5BP2I",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5605239595",
+        "text": "=🚨 PERINGATAN KRISIS PELANGGAN (Skor: {{ $('Edit Fields').item.json['skor '] }} /10)\n━━━━━━━━━━━━━━━━━━━━\n🎫 Tiket: {{ $('Edit Fields').item.json.id_tiket }}\n👤 Pelanggan: {{ $('On form submission').item.json['Nama Pelanggan '] }} ({{ $('On form submission').item.json['Nomor WhatsApp'] }})\n📧 Email: {{ $('On form submission').item.json['Email Pelanggan'] }}\n⚠️ Kendala: {{ $('On form submission').item.json['Jenis Kendala'] }}\n💬 Pesan Keluhan:\n\"{{ $('On form submission').item.json['Pesan Keluhan / Pertanyaan'] }}\"\n💡 Draf Solusi Cepat AI:\n\"{{ $('Edit Fields').item.json.draf_balasan }}\"",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        -128
+      ],
+      "id": "363eb43b-5275-44bf-8881-91f7847c0acb",
+      "name": "Send a text message",
+      "webhookId": "0a900945-f41e-44fd-89c4-2138b8523fc3",
+      "credentials": {
+        "telegramApi": {
+          "id": "cvleaP8scoJN3aaB",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "LWMrzXm5wcNQkSnE",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-15T02:41:50.487Z",
+      "updatedAt": "2026-10-15T02:41:50.487Z"
+    }
+  ],
+  "activeVersion": null
+}
