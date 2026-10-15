@@ -1,0 +1,142 @@
+{
+  "id": "tCIXPKhf0J2bZ5SB",
+  "name": "Ebook Workflow 5 Global Error Handler",
+  "active": true,
+  "activeVersionId": "0a6607cb-f703-4b09-8d78-ec6ce7058b5a",
+  "createdAt": "2026-10-15T06:47:54.508Z",
+  "updatedAt": "2026-10-15T07:28:06.075Z",
+  "isArchived": false,
+  "versionId": "0a6607cb-f703-4b09-8d78-ec6ce7058b5a",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -176
+      ],
+      "id": "663497b1-f250-4fed-b0cf-740202beef30",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "5605239595",
+        "text": "=⚠️ PERINGATAN SISTEM N8N CRASH! ━━━━━━━━━━━━━━━━━━━━ 📍 Workflow: {{ $json.workflow.name }} ❌ Node yang Macet: {{ $json.execution.error.node.name }} 📝 Penyebab: {{ $json.execution.error.message }} 🔗 Link Error: http://localhost:5678/execution/{{ $json.execution.id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        -176
+      ],
+      "id": "09069352-c753-40d4-b95d-2160add5b77f",
+      "name": "Send a text message",
+      "webhookId": "ce47a79b-1c22-412f-b3fb-4bde1e894d91",
+      "credentials": {
+        "telegramApi": {
+          "id": "cvleaP8scoJN3aaB",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "tCIXPKhf0J2bZ5SB",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "tCIXPKhf0J2bZ5SB",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-15T06:47:54.508Z",
+      "updatedAt": "2026-10-15T06:47:54.508Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "0a6607cb-f703-4b09-8d78-ec6ce7058b5a",
+    "workflowId": "tCIXPKhf0J2bZ5SB",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          -160,
+          -176
+        ],
+        "id": "663497b1-f250-4fed-b0cf-740202beef30",
+        "name": "Error Trigger"
+      },
+      {
+        "parameters": {
+          "chatId": "5605239595",
+          "text": "=⚠️ PERINGATAN SISTEM N8N CRASH! ━━━━━━━━━━━━━━━━━━━━ 📍 Workflow: {{ $json.workflow.name }} ❌ Node yang Macet: {{ $json.execution.error.node.name }} 📝 Penyebab: {{ $json.execution.error.message }} 🔗 Link Error: http://localhost:5678/execution/{{ $json.execution.id }}",
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          208,
+          -176
+        ],
+        "id": "09069352-c753-40d4-b95d-2160add5b77f",
+        "name": "Send a text message",
+        "webhookId": "ce47a79b-1c22-412f-b3fb-4bde1e894d91",
+        "credentials": {
+          "telegramApi": {
+            "id": "cvleaP8scoJN3aaB",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mohammad Ricky",
+    "name": "Version 0a6607cb",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-10-15T06:50:20.409Z",
+    "updatedAt": "2026-10-15T07:27:47.571Z"
+  }
+}
