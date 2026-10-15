@@ -1,0 +1,85 @@
+{
+  "id": "MFS5kb2vjaUayQiG",
+  "name": "Ebook Workflow 1",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-14T12:50:08.299Z",
+  "updatedAt": "2026-10-14T16:29:11.872Z",
+  "isArchived": false,
+  "versionId": "9ef2e4f4-b848-48f3-a6db-457b7fed6f18",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b260fc84-4da7-4593-be8d-956bdb3f19d7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8c2e73b1-7ade-44e1-961b-14029b2b074e",
+              "name": "nama_pelanggan",
+              "value": "Mochamad Ricky",
+              "type": "string"
+            },
+            {
+              "id": "5869ff69-f199-42fa-b9a5-66ec57cd5c9d",
+              "name": "status_pembayaran",
+              "value": "LUNAS",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "709bb29a-7a98-4514-b0c0-c14e0e6b56a7",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "MFS5kb2vjaUayQiG",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-14T12:50:08.299Z",
+      "updatedAt": "2026-10-14T12:50:08.299Z"
+    }
+  ],
+  "activeVersion": null
+}
