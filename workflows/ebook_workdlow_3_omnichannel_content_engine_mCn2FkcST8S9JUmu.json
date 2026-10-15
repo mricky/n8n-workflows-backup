@@ -1,0 +1,443 @@
+{
+  "id": "mCn2FkcST8S9JUmu",
+  "name": "Ebook Workdlow 3 Omnichannel Content Engine",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-15T00:54:23.386Z",
+  "updatedAt": "2026-10-15T02:00:54.902Z",
+  "isArchived": false,
+  "versionId": "43108e19-c6a7-4b5f-9dfc-208049da0052",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "963fbc77-0b08-4df3-b135-2c60e031450b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1cNEqWbdKbY6cOD0JKIZQDWNuMAGFQ6fGG4U4REjd2qs/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cNEqWbdKbY6cOD0JKIZQDWNuMAGFQ6fGG4U4REjd2qs/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "READY"
+            }
+          ]
+        },
+        "combineFilters": "=AND",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        0
+      ],
+      "id": "3f3f9643-83da-41cc-9fe9-599f12968cfa",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Chief Content Strategist untuk perusahaan B2B EduTech SaaS (Aplikasi Manajemen Sekolah Modern).\nTugasmu: Dari 1 topik mentah berikut, buatkan 4 format konten berbeda yang tajam, profesional, dan siap tayang di kanal omnichannel.\n\nDATA TOPIK MENTAH:\n- Topik Ide: {{ $json['Topik Ide'] }}\n- Target Pembaca: {{ $json['Target Pembaca'] }}\n\nFORMAT KONTEN YANG WAJIB DIBUAT:\n1. JUDUL BLOG SEO: Judul menarik yang ramah mesin pencari Google (maksimal 60 karakter).\n2. DRAFT ARTIKEL BLOG: Struktur ringkas (Pembuka, 3 Poin Masalah & Solusi Manajemen Keuangan Sekolah, dan Penutup).\n3. UTAS THREADS / X: Utas 3 tweet bergaya storytelling santai dan menyentuh keresahan bendahara sekolah.\n4. CAPTION INSTAGRAM: Hook kalimat pertama yang memikat + 3 tips praktis + Call to Action (CTA) + 5 hashtag relevan.\n5. PROMPT GAMBAR AI (FLUX / MIDJOURNEY): Deskripsi visual bahasa Inggris untuk membuat ilustrasi banner modern bertema administrasi sekolah Indonesia.\n\nATURAN OUTPUT:\nBalas HANYA dengan JSON murni tanpa awalan markdown seperti ```json atau tanda kutip tambahan:\n{\n  \"judul_blog_seo\": \"...\",\n  \"draft_blog\": \"...\",\n  \"utas_threads\": \"...\",\n  \"caption_instagram\": \"...\",\n  \"prompt_gambar_ai\": \"A modern flat-vector illustration of an Indonesian female school accountant smiling in front of a modern laptop with digital charts, pastel blue and emerald palette, minimalist design\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        288,
+        0
+      ],
+      "id": "fe8c2a83-3c0d-4869-894f-c638067d0553",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        224
+      ],
+      "id": "ac6e2c46-6116-4d79-b599-b1b86781a9db",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8010686-3547-47ef-b8e1-aa5476d00c7a",
+              "name": "judul_blog_seo",
+              "value": "={{ JSON.parse($json.text).judul_blog_seo }}",
+              "type": "string"
+            },
+            {
+              "id": "664228f1-1be8-434f-b790-03ba7897fa03",
+              "name": "draft_blog",
+              "value": "={{ JSON.parse($json.text).draft_blog }}",
+              "type": "string"
+            },
+            {
+              "id": "1d3a4c80-58ac-4a78-b3d3-7057eb94d6f5",
+              "name": "utas_threads",
+              "value": "={{ JSON.parse($json.text).utas_threads }}",
+              "type": "string"
+            },
+            {
+              "id": "4d19a5cb-a4db-4e5f-973c-4ea055c75ea1",
+              "name": "caption_instagram",
+              "value": "={{ JSON.parse($json.text).caption_instagram }}",
+              "type": "string"
+            },
+            {
+              "id": "4a99d9aa-3a55-49e6-9eff-d6c736b940c5",
+              "name": "prompt_gambar_ai",
+              "value": "={{ JSON.parse($json.text).prompt_gambar_ai }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        656,
+        0
+      ],
+      "id": "ab62119a-0528-4127-962c-179ccfb5553b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1cNEqWbdKbY6cOD0JKIZQDWNuMAGFQ6fGG4U4REjd2qs/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 532663537,
+          "mode": "list",
+          "cachedResultName": "Content Bank",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cNEqWbdKbY6cOD0JKIZQDWNuMAGFQ6fGG4U4REjd2qs/edit#gid=532663537"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.format('yyyy-MM-dd HH:mm') }}",
+            "Topik Asli": "={{ $('Get row(s) in sheet').item.json['Topik Ide'] }}",
+            "Target": "={{ $('Get row(s) in sheet').item.json['Target Pembaca'] }}",
+            "Judul Blog": "={{ $json.judul_blog_seo }}",
+            "Draft Blog": "={{ $json.draft_blog }}",
+            "Utas Threads": "={{ $json.utas_threads }}",
+            "Caption Instagram": "={{ $json.caption_instagram }}",
+            "Prompt Flux AI": "={{ $json.prompt_gambar_ai }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Topik Asli",
+              "displayName": "Topik Asli",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Target",
+              "displayName": "Target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Judul Blog",
+              "displayName": "Judul Blog",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Draft Blog",
+              "displayName": "Draft Blog",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Utas Threads",
+              "displayName": "Utas Threads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Caption Instagram",
+              "displayName": "Caption Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Prompt Flux AI",
+              "displayName": "Prompt Flux AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        880,
+        0
+      ],
+      "id": "bc396208-a904-4192-a614-7d436c6f4e50",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1cNEqWbdKbY6cOD0JKIZQDWNuMAGFQ6fGG4U4REjd2qs/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cNEqWbdKbY6cOD0JKIZQDWNuMAGFQ6fGG4U4REjd2qs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}.",
+            "Status": "PUBLISHED"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Topik Ide",
+              "displayName": "Topik Ide",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Target Pembaca",
+              "displayName": "Target Pembaca",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "eac7b164-0e0b-4835-936a-648d026e2839",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "mCn2FkcST8S9JUmu",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-15T00:54:23.386Z",
+      "updatedAt": "2026-10-15T00:54:23.386Z"
+    }
+  ],
+  "activeVersion": null
+}
