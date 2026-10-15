@@ -1,0 +1,358 @@
+{
+  "id": "ZZYhH2YpfOZy66Xp",
+  "name": "Ebook Workflow 2 AI Inbound B2B Lead Qualification & Instant Routing",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-14T16:29:52.782Z",
+  "updatedAt": "2026-10-14T17:46:29.383Z",
+  "isArchived": false,
+  "versionId": "74a37334-55f8-40e4-b7f8-196537fee049",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Formulir Permintaan Penawaran Sewa Armada (RFQ Logistik)",
+        "formDescription": "Lengkapi rincian kebutuhan muatan dan rute perusahaan Anda. Tim kami akan mengirimkan estimasi penawaran dalam 15 menit.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Kontak"
+            },
+            {
+              "fieldLabel": "Nama Perusahaan"
+            },
+            {
+              "fieldLabel": "Jenis Muatan dan Rute"
+            },
+            {
+              "fieldLabel": "Kebutuhan Armada Bulanan",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1 – 2 Unit Truk (Kebutuhan Ritel / Pindahan)"
+                  },
+                  {
+                    "option": "3 – 5 Unit Truk (Distribusi Rutin Cabang)"
+                  },
+                  {
+                    "option": "6 – 15 Unit Truk (Kontrak Rute Reguler)"
+                  },
+                  {
+                    "option": "> 15 Unit Truk (Dedicated Enterprise Fleet)"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Estimasi Anggaran Bulanan",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "< Rp 10 Juta"
+                  },
+                  {
+                    "option": "Rp 10 Juta – Rp 30 Juta"
+                  },
+                  {
+                    "option": "Rp 30 Juta – Rp 70 Juta"
+                  },
+                  {
+                    "option": "> Rp 70 Juta (Prioritas Utama / High-Ticket)"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "340e2e81-f8dc-41f8-8759-2c6c26abdfd3",
+      "name": "On form submission",
+      "webhookId": "ae5eb1a5-f782-49e8-a1b2-740a01d31e93"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Senior VP of Sales & Commercial di perusahaan logistik skala nasional (3PL & Ekspedisi Kontainer).\nTugas utamamu adalah menganalisis data penawaran harga (RFQ) masuk dari formulir website, lalu menentukan skor kelayakan bisnis (Lead Score 0 - 100), kategori prospek, dan status tindak lanjut untuk tim sales.\n\nDATA PROSPEK MASUK DARI FORMULIR:\n- Perusahaan: {{ $json['Nama Perusahaan'] }}\n- Kontak / WhatsApp: {{ $json['Kontak'] }}\n- Jenis Muatan & Rute: {{ $json['Jenis Muatan dan Rute'] }}\n- Kebutuhan Armada Bulanan: {{ $json['Kebutuhan Armada Bulanan'] }}\n- Estimasi Anggaran Bulanan: {{ $json['Estimasi Anggaran Bulanan'] }}\n\nPANDUAN PENILAIAN (LEAD SCORING):\n1. HOT LEAD (Skor 80 - 100):\n   - Kebutuhan armada > 15 Unit atau 6-15 Unit reguler.\n   - Anggaran > Rp 70 Juta atau Rp 30 - 70 Juta.\n   - Rute strategis industri/pabrik (misal: Jabodetabek, Surabaya, Cikarang, Cilegon, antarpulau).\n   - Status Lead: \"🔥 PRIORITAS TINGGI\"\n   - Tindakan: Wajib dihubungi tim sales via WhatsApp/Telepon dalam waktu < 10 menit!\n\n2. WARM LEAD (Skor 50 - 79):\n   - Kebutuhan 3 - 5 Unit armada rutin.\n   - Anggaran Rp 10 - 30 Juta.\n   - Bisnis berkembang / distribusi cabang.\n   - Status Lead: \"🟡 PERLU FOLLOW UP\"\n   - Tindakan: Kirimkan katalog profil armada & hubungi dalam 1x24 jam.\n\n3. COLD LEAD (Skor 0 - 49):\n   - Kebutuhan 1 - 2 unit atau insidental/pindahan kecil.\n   - Anggaran < Rp 10 Juta atau ritel perorangan.\n   - Status Lead: \"⚪ NURTURING REGULER\"\n   - Tindakan: Masukkan ke database email broadcast promo bulanan.\n\nATURAN OUTPUT:\nKamu WAJIB membalas HANYA dengan format JSON murni yang valid tanpa awalan markdown seperti ```json atau tanda kutip tambahan di luar teks JSON.\n\nFormat JSON yang wajib kamu hasilkan:\n{\n  \"skor\": 92,\n  \"kategori\": \"HOT\",\n  \"status_lead\": \"🔥 PRIORITAS TINGGI\",\n  \"perusahaan\": \"{{ $json['Nama Perusahaan'] }}\",\n  \"whatsapp\": \"{{ $json['Kontak'] }}\",\n  \"alasan_analisis\": \"Kebutuhan armada reguler dengan anggaran stabil di rute industri strategis.\",\n  \"rekomendasi_tindakan\": \"Segera hubungi PIC via WhatsApp dalam waktu kurang dari 10 menit untuk finalisasi kebutuhan armada.\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c1808c05-4fd8-4314-b6cd-cfc4e3f38cfe",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        208
+      ],
+      "id": "575b26b5-7aee-4a58-8bd3-b4f901803790",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a2a79a3-8098-4e64-811d-5dc909d1733d",
+              "name": "kategori",
+              "value": "={{ JSON.parse($json.text).kategori }}",
+              "type": "string"
+            },
+            {
+              "id": "0c1aa3a6-5909-4355-a595-22f3a7c24bf8",
+              "name": "skor",
+              "value": "={{ JSON.parse($json.text).skor }}",
+              "type": "number"
+            },
+            {
+              "id": "43b91abd-031b-44f8-adbc-1ffebecdc40f",
+              "name": "status_lead",
+              "value": "={{ JSON.parse($json.text).status_lead }}",
+              "type": "string"
+            },
+            {
+              "id": "071970cf-7e3e-4d70-ba6a-7036291e1a27",
+              "name": "alasan_analisis",
+              "value": "={{ JSON.parse($json.text).alasan_analisis }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        368,
+        1.5937474481761456
+      ],
+      "id": "5968e55b-9c77-4e51-a042-bb39abbf8432",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1IYKZcJS3Ui6as7YQnkv1FgZ4fMmqKt3Tj_eoBYrnsRg/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IYKZcJS3Ui6as7YQnkv1FgZ4fMmqKt3Tj_eoBYrnsRg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.format('yyyy-MM-dd HH:mm') }}",
+            "Perusahaan": "={{ $('On form submission').item.json['Nama Perusahaan'] }}",
+            "WhatsApp": "={{ $('On form submission').item.json['Kontak'] }}",
+            "Rute": "={{ $('On form submission').item.json['Jenis Muatan dan Rute'] }}",
+            "Armada": "={{ $('On form submission').item.json['Kebutuhan Armada Bulanan'] }}",
+            "Budget": "={{ $('On form submission').item.json['Estimasi Anggaran Bulanan'] }}",
+            "Skor AI": "={{ $json.skor }}",
+            "Status Lead": "={{ $json.status_lead }}",
+            "Catatan Analisis AI": "={{ $json.alasan_analisis }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Perusahaan",
+              "displayName": "Perusahaan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rute",
+              "displayName": "Rute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Armada",
+              "displayName": "Armada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skor AI",
+              "displayName": "Skor AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status Lead",
+              "displayName": "Status Lead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Catatan Analisis AI",
+              "displayName": "Catatan Analisis AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        592,
+        16
+      ],
+      "id": "9b5ca667-bb2e-4794-bb7a-c8eb14348b63",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "MTETjgV2tCTSFhF7",
+          "name": "Google Service Account account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "ZZYhH2YpfOZy66Xp",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-14T16:29:52.782Z",
+      "updatedAt": "2026-10-14T16:29:52.782Z"
+    }
+  ],
+  "activeVersion": null
+}
