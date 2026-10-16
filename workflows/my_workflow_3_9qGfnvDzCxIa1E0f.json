@@ -1,0 +1,578 @@
+{
+  "id": "9qGfnvDzCxIa1E0f",
+  "name": "My workflow 3",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-16T06:58:47.719Z",
+  "updatedAt": "2026-10-16T10:08:17.734Z",
+  "isArchived": false,
+  "versionId": "e7248db7-8a43-46c3-8cc8-e4300c6a7c7b",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -176
+      ],
+      "id": "ea593d1e-2bd5-4435-9ccc-bcd9e2c36403",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -656,
+        144
+      ],
+      "id": "10fb6f5a-07ca-4c11-ac0e-5ee8ce1baf81",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -240,
+        -80
+      ],
+      "id": "22b15f19-efb4-45f0-9226-0a96bc82d427",
+      "name": "Portal 1: RemoteOK API"
+    },
+    {
+      "parameters": {
+        "url": "https://remoteok.com/api?tag=backend",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -240,
+        -304
+      ],
+      "id": "62ae916f-20f7-41e1-adb6-74a014711db6",
+      "name": "Portal 2: WeWorkRemotely RSS"
+    },
+    {
+      "parameters": {
+        "url": "https://remotive.com/api/remote-jobs?category=software-dev",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -240,
+        112
+      ],
+      "id": "70ee734f-1ebe-43e9-a567-1b00adf1e011",
+      "name": "Portal 3: Remotive API"
+    },
+    {
+      "parameters": {
+        "jsCode": "const targetKeywords = ['staff', 'principal', 'lead', 'backend', 'architect', 'ai', 'engineer', 'senior'];\nconst seenHashes = new Set();\nconst output = [];\n\nfunction addJob(company, position, url, location, salary, desc) {\n  if (!company || !position) return;\n  const titleLower = position.toLowerCase();\n  \n  if (targetKeywords.some(k => titleLower.includes(k))) {\n    const cleanComp = company.toLowerCase().replace(/[^a-z0-9]/g, '');\n    const cleanPos = titleLower.replace(/[^a-z0-9]/g, '');\n    const idHash = `${cleanComp}_${cleanPos}`;\n\n    if (!seenHashes.has(idHash)) {\n      seenHashes.add(idHash);\n      output.push({\n        json: {\n          id_hash: idHash,\n          company: company.trim(),\n          position: position.trim(),\n          url: url || '',\n          company_url: `https://${cleanComp}.com`,\n          location: location || 'Remote (Worldwide)',\n          salary: salary || 'Not Disclosed',\n          description: desc ? desc.substring(0, 1500) : position\n        }\n      });\n    }\n  }\n}\n\nfor (const item of $input.all()) {\n  const d = item.json;\n  if (!d) continue;\n\n  // 1. Format RemoteOK\n  if (d.slug && d.position) {\n    const sal = (d.salary_min && d.salary_max) ? `$${d.salary_min} - $${d.salary_max}` : 'Not Disclosed';\n    addJob(d.company, d.position, d.url || `https://remoteok.com/remote-jobs/${d.slug}`, d.location, sal, d.description);\n  }\n  // 2. Format RSS (WeWorkRemotely, Himalayas, NoDesk)\n  else if (d.title && (d.link || d.guid)) {\n    let company = 'Tech Company';\n    let role = d.title;\n    if (d.title.includes(':')) {\n      const parts = d.title.split(':');\n      company = parts[0].trim();\n      role = parts.slice(1).join(':').trim();\n    } else if (d.title.includes(' at ')) {\n      const parts = d.title.split(' at ');\n      role = parts[0].trim();\n      company = parts[1].trim();\n    }\n    addJob(company, role, d.link || d.guid, d.region || 'Worldwide', 'Not Disclosed', d.contentSnippet || d.content);\n  }\n  // 3. Format Remotive & Arbeitnow (Array Jobs / Data)\n  else if (d.jobs && Array.isArray(d.jobs)) {\n    for (const job of d.jobs) {\n      addJob(job.company_name, job.title, job.url, job.candidate_required_location, job.salary || 'Not Disclosed', job.description);\n    }\n  }\n  else if (d.data && Array.isArray(d.data)) {\n    for (const job of d.data) {\n      addJob(job.company_name, job.title, job.url, job.location, 'Not Disclosed', job.description);\n    }\n  }\n}\n\n// Batasi 5 lowongan teratas per run agar aman di kuota AI\nreturn output.slice(0, 10);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        -96
+      ],
+      "id": "59b2cf7e-26d5-41b4-8b45-051ae3e6988e",
+      "name": "Consolidate, Filter & Hash"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==Analisis lowongan kerja remote ini untuk profil Mochamad Ricky (Senior Software Architect 14+ tahun: Go, Node.js, Python, PostgreSQL, AWS, Kubernetes, AI Automation & n8n).\n\nPerusahaan: {{ $json.company }}\nPosisi: {{ $json.position }}\nLokasi/Timezone: {{ $json.location }}\nGaji: {{ $json.salary }}\nDeskripsi Ringkas: {{ $json.description }}\n\nKembalikan HANYA format JSON valid berikut (tanpa blok markdown):\n{\n  \"hiring_manager\": \"Nama Hiring Manager/Recruiter jika disebut di teks, atau 'Not Mentioned'\",\n  \"company_url\": \"{{ $json.company_url }}\",\n  \"work_model\": \"Tentukan: '100% Remote (WFH)', 'Hybrid', atau 'On-site'\",\n  \"estimated_salary\": \"{{ $json.salary }}\",\n  \"timezone\": \"{{ $json.location }}\",\n  \"match_score\": \"90%\",\n  \"pitch_cover_note\": \"Tulis 3 kalimat draf pitching personal berbahasa Inggris yang kuat untuk recruiter.\",\n  \"linkedin_dm_script\": \"Tulis draf pesan pendek di bawah 300 karakter untuk connection request note ke hiring manager: sebut posisi, 14+ yrs backend/AI, dan ajakan singkat untuk connect.\"\n}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        496,
+        -96
+      ],
+      "id": "619e421a-39b1-4755-a5b5-16d3bb9152ff",
+      "name": "AI Gemini Fit Analysis"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1PhXMoZVpx3tNpfxhHRg3XosxqtY3vg9pERik97cSl_U/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PhXMoZVpx3tNpfxhHRg3XosxqtY3vg9pERik97cSl_U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "tanggal_ditemukan": "={{ $now.format('yyyy-MM-dd') }}",
+            "perusahaan": "=",
+            "company_url": "={{ $json.company_url }}",
+            "estimasi_gaji": "={{ $json.estimated_salary }}",
+            "hiring_manager": "={{ $json.hiring_manager }}",
+            "timezone_policy": "={{ $json.timezone }}",
+            "match_score": "={{ $json.match_score }}"
+          },
+          "matchingColumns": [
+            "id_hash"
+          ],
+          "schema": [
+            {
+              "id": "id_hash",
+              "displayName": "id_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tanggal_ditemukan",
+              "displayName": "tanggal_ditemukan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "perusahaan",
+              "displayName": "perusahaan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "posisi",
+              "displayName": "posisi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_url",
+              "displayName": "company_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hiring_manager",
+              "displayName": "hiring_manager",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "estimasi_gaji",
+              "displayName": "estimasi_gaji",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timezone_policy",
+              "displayName": "timezone_policy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "match_score",
+              "displayName": "match_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url_lowongan",
+              "displayName": "url_lowongan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pitch_cover_note",
+              "displayName": "pitch_cover_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tanggal_apply",
+              "displayName": "tanggal_apply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "catatan",
+              "displayName": "catatan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "work_model",
+              "displayName": "work_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_dm_script",
+              "displayName": "linkedin_dm_script",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "c8522392-55d4-49e7-a1ef-48b5a9f4503f",
+      "name": "Append to Master Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "75awslAmrwe7W9w3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nlet originalJobs = [];\ntry {\n  originalJobs = $('Consolidate, Filter & Hash').all();\n} catch (e) {\n  originalJobs = [];\n}\n\nconst items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  let aiData = {};\n  \n  // Ekstrak HANYA blok JSON { ... } secara otomatis\n  try {\n    const rawText = item.json.text || '';\n    const jsonMatch = rawText.match(/\\{[\\s\\S]*\\}/);\n    if (jsonMatch) {\n      aiData = JSON.parse(jsonMatch[0]);\n    }\n  } catch (e) {\n    aiData = {};\n  }\n\n  const orig = originalJobs[i] ? originalJobs[i].json : (item.json || {});\n\n  output.push({\n    json: {\n      id_hash: orig.id_hash || 'job_hash',\n      tanggal_ditemukan: new Date().toISOString().split('T')[0],\n      perusahaan: orig.company || 'Tech Company',\n      posisi: orig.position || 'Software Engineer',\n      company_url: aiData.company_url || orig.company_url || '',\n      hiring_manager: aiData.hiring_manager || 'Not Mentioned',\n      work_model: aiData.work_model || '100% Remote (WFH)',\n      estimasi_gaji: aiData.estimated_salary || orig.salary || 'Not Disclosed',\n      timezone_policy: aiData.timezone || orig.location || 'Worldwide',\n      match_score: aiData.match_score || '85%',\n      url_lowongan: orig.url || '',\n      pitch_cover_note: aiData.pitch_cover_note || '',\n      linkedin_dm_script: aiData.linkedin_dm_script || '',\n      status: 'TO_APPLY',\n      tanggal_apply: '',\n      catatan: ''\n    }\n  });\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "0c5fa507-1dfa-4e45-9687-b76c78ceede8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "llama3:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        496,
+        176
+      ],
+      "id": "5264c45f-1671-4ead-9c9f-30a3d8980164",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "cpNXtxEBYXQ8RbIr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://himalayas.app/jobs/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -240,
+        304
+      ],
+      "id": "c260c0be-892f-4b0e-8a04-4f42cd9804a9",
+      "name": "Portal 4 Himalaya"
+    },
+    {
+      "parameters": {
+        "url": "https://nodesk.co/remote-jobs/index.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -240,
+        512
+      ],
+      "id": "25b6e3d5-d297-4217-b490-ecb6cb848c45",
+      "name": "Portal 5 Nodesk"
+    },
+    {
+      "parameters": {
+        "url": "https://www.arbeitnow.com/api/job-board-api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -240,
+        688
+      ],
+      "id": "91ba06a2-3b44-495f-a51d-3ac073d56539",
+      "name": "Portal 6 Arbeitnow"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Portal 2: WeWorkRemotely RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Portal 5 Nodesk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Portal 6 Arbeitnow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Portal 4 Himalaya",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Portal 3: Remotive API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Portal 1: RemoteOK API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Portal 2: WeWorkRemotely RSS": {
+      "main": [
+        [
+          {
+            "node": "Consolidate, Filter & Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Portal 1: RemoteOK API": {
+      "main": [
+        [
+          {
+            "node": "Consolidate, Filter & Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Portal 3: Remotive API": {
+      "main": [
+        [
+          {
+            "node": "Consolidate, Filter & Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidate, Filter & Hash": {
+      "main": [
+        [
+          {
+            "node": "AI Gemini Fit Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Gemini Fit Analysis": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Master Sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append to Master Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Gemini Fit Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Portal 4 Himalaya": {
+      "main": [
+        [
+          {
+            "node": "Consolidate, Filter & Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Portal 5 Nodesk": {
+      "main": [
+        [
+          {
+            "node": "Consolidate, Filter & Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Portal 6 Arbeitnow": {
+      "main": [
+        [
+          {
+            "node": "Consolidate, Filter & Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "9qGfnvDzCxIa1E0f",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-16T06:58:47.719Z",
+      "updatedAt": "2026-10-16T06:58:47.719Z"
+    }
+  ],
+  "activeVersion": null
+}
