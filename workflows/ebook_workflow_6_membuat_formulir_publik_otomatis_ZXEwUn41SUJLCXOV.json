@@ -1,0 +1,197 @@
+{
+  "id": "ZXEwUn41SUJLCXOV",
+  "name": "Ebook Workflow 6 Membuat Formulir Publik Otomatis",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-15T15:45:36.015Z",
+  "updatedAt": "2026-10-15T16:29:14.747Z",
+  "isArchived": false,
+  "versionId": "93bc0846-e3b2-4794-acf5-9520b1b7a6f8",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Formulir Pendaftaran Layanan",
+        "formDescription": "Silakan isi data di bawah ini, tim kami akan segera menghubungi Anda dalam 24 jam.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nama Lengkap"
+            },
+            {
+              "fieldLabel": "Email Anda",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Pilihan Layanan",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Konsultasi Gratis"
+                  },
+                  {
+                    "option": "Paket Bisnis"
+                  },
+                  {
+                    "option": "Paket Enterprise"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4ba0668e-9b86-49f4-80ba-674ee5e38091",
+      "name": "On form submission",
+      "webhookId": "2b190e04-10ad-450d-9538-631c8ce0589a"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/10G9_ie5HVHuAJoZC4Muf11kMeICVSf_-O--eV3MyLK0/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10G9_ie5HVHuAJoZC4Muf11kMeICVSf_-O--eV3MyLK0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nama Lengkap": "={{ $json['Nama Lengkap'] }}",
+            "Email Anda": "={{ $json['Email Anda'] }}",
+            "Pilihan Layanan": "={{ $json['Pilihan Layanan'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nama Lengkap",
+              "displayName": "Nama Lengkap",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Anda",
+              "displayName": "Email Anda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pilihan Layanan",
+              "displayName": "Pilihan Layanan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "40d2fb17-d10d-450d-8808-cc5da30974c1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "75awslAmrwe7W9w3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email Anda'] }}",
+        "subject": "=Test Email",
+        "message": "=Halo  {{ $json['Nama Lengkap'] }}Terima kasih sudah mendaftar untuk layanan {{ $json['Pilihan Layanan'] }}. Formulir Anda telah kami terima dengan baik dan sedang dipelajari oleh tim kami. Kami akan segera menghubungi Anda kembali dalam waktu kurang dari 24 jam kerja. Salam hangat, Tim Otomasi Bisnis",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "ee269453-f89c-4c4e-9f47-46c46c9896c7",
+      "name": "Send a message",
+      "webhookId": "687e3b78-4f63-4fca-af74-bc5fb5a6d46f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Umm9o1NVtnRWp4Et",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "ZXEwUn41SUJLCXOV",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-15T15:45:36.015Z",
+      "updatedAt": "2026-10-15T15:45:36.015Z"
+    }
+  ],
+  "activeVersion": null
+}
