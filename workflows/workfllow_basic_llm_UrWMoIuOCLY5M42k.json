@@ -1,0 +1,47 @@
+{
+  "id": "UrWMoIuOCLY5M42k",
+  "name": "Workfllow Basic LLM",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-16T01:42:21.128Z",
+  "updatedAt": "2026-10-16T01:43:26.750Z",
+  "isArchived": false,
+  "versionId": "1d4b47f7-4bd9-4239-a604-9c3c5474debf",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "91b2e31a-96e9-4f8b-a44c-62e9b0533854",
+      "name": "On form submission",
+      "webhookId": "01e66898-dd7a-4bc8-9f50-8c0f1352656a"
+    }
+  ],
+  "connections": {},
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "UrWMoIuOCLY5M42k",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-16T01:42:21.128Z",
+      "updatedAt": "2026-10-16T01:42:21.128Z"
+    }
+  ],
+  "activeVersion": null
+}
