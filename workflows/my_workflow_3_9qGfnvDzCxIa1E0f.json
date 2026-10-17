@@ -4,9 +4,9 @@
   "active": false,
   "activeVersionId": null,
   "createdAt": "2026-10-16T06:58:47.719Z",
-  "updatedAt": "2026-10-16T10:08:17.734Z",
+  "updatedAt": "2026-10-16T13:47:07.173Z",
   "isArchived": false,
-  "versionId": "e7248db7-8a43-46c3-8cc8-e4300c6a7c7b",
+  "versionId": "b9286744-7fd4-4198-b92d-e6bf66f651bf",
   "triggerCount": 0,
   "nodes": [
     {
@@ -48,7 +48,7 @@
       "typeVersion": 4.5,
       "position": [
         -240,
-        -80
+        -96
       ],
       "id": "22b15f19-efb4-45f0-9226-0a96bc82d427",
       "name": "Portal 1: RemoteOK API"
