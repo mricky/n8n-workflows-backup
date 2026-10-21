@@ -1,0 +1,793 @@
+{
+  "id": "KGI8TspVpy4Tj31v",
+  "name": "Content Management & Publishing Engine (YouTube Shorts)",
+  "active": true,
+  "activeVersionId": "6ef396c0-e130-41f0-91b9-701945baa287",
+  "createdAt": "2026-10-21T04:42:17.075Z",
+  "updatedAt": "2026-10-21T07:58:57.856Z",
+  "isArchived": false,
+  "versionId": "5067a84e-3ac7-44ec-9da5-8a059abc66e5",
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -96
+      ],
+      "id": "71481489-9b6f-4648-8ae4-05d14c610677",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 11,
+              "triggerAtMinute": 45
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -224,
+        160
+      ],
+      "id": "29b8fa83-7cd4-4e6b-b6bb-b96da584967b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U",
+          "mode": "list",
+          "cachedResultName": "YouTube_Shorts_@mricky",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        -96
+      ],
+      "id": "2a88c437-1c60-48b4-9f43-abf6bdfb7c4a",
+      "name": "Baca Line Content Youtube",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "75awslAmrwe7W9w3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Ambil seluruh data baris dari Google Sheets\nconst items = $input.all();\n\n// 2. Filter baris yang kolom Status-nya 'READY'\nconst pending = items.filter(item => {\n  const status = item.json['Status'] || item.json['status'] || '';\n  return status.toString().trim().toUpperCase() === 'READY';\n});\n\n// 3. Jika tidak ada baris READY, berhenti aman\nif (pending.length === 0) {\n  return [];\n}\n\n// 4. Ambil 1 baris teratas yang READY\nconst target = pending[0].json;\n\n// 5. Ambil nama file MP4 di Drive\nconst filename = (target['Video Filename'] || target['video_file_name'] || target['Filename'] || '').trim();\n\n// 6. Siapkan Judul dengan hashtag #Shorts\nlet title = target['YouTube Title'] || target['youtube_title'] || target['Title'] || 'Otomasi Cerdas dengan n8n';\nif (!title.toLowerCase().includes('#shorts')) {\n  title = `${title} #Shorts`;\n}\n\n// 7. Siapkan Deskripsi & Tags\nconst defaultDescription = `Dari proses manual berhari-hari, dipangkas jadi hitungan detik menggunakan n8n & modern web ERP! ⚡\\n\\n📌 Fitur yang didemokan:\\n- Realtime multi-bank transaction ingestion\\n- 3-Way Auto-Match kliring instan\\n- Split matching & quick adjustment journal\\n- Export Berita Acara Rekonsiliasi resmi format PDF\\n\\n🎥 Tutorial arsitektur lengkapnya tonton di channel YouTube: @mrickyit\\n\\n#Shorts #n8n #ERP #AccountingAutomation #Fintech #Nextjs #Supabase`;\n\nconst description = target['Description'] || target['description'] || defaultDescription;\nconst rawTags = target['Tags'] || target['tags'] || '';\nconst tags = rawTags \n  ? rawTags.split(',').map(t => t.trim()) \n  : ['Shorts', 'n8n', 'ERP', 'Accounting', 'Fintech', 'Nextjs', 'Supabase', 'Automation', 'Ricky'];\n\n// 8. Kirim 1 item data siap pakai ke node selanjutnya\nreturn [{\n  json: {\n    video_file_name: filename,\n    title: title,\n    description: description,\n    tags: tags\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -96
+      ],
+      "id": "962a392c-12cc-444c-baeb-e66371a1a76a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.video_file_name }}",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "06221dda-dd0d-445a-845d-7cc2dde75ef4",
+      "name": "Find Video File in Google Drive",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bnZ5mcdT3JivbX5E",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b40873d0-5453-434d-a3da-cbf9ff112722",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        -96
+      ],
+      "id": "a75926da-9fd4-45d6-9ce6-7f8bcd579f81",
+      "name": "Cek File Ada di Drive?"
+    },
+    {
+      "parameters": {
+        "chatId": "=5605239595",
+        "text": "==⚠️ *PERINGATAN GAGAL UPLOAD YOUTUBE SHORTS!*\n❌ *Penyebab:* File video tidak ditemukan di Google Drive!\n📁 *Nama File Dicari:* `{{ $('Code in JavaScript').item.json.video_file_name }}`\n📌 *Judul Konten:* {{ $('Code in JavaScript').item.json.title }}\n💡 *Solusi:*\n1. Pastikan file MP4 sudah di-drop ke folder *Antrian-Video-YouTube-Short*.\n2. Cek apakah ada typo/salah ketik nama file di Google Sheet.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        80
+      ],
+      "id": "764b1dd1-c834-40b7-9873-50c03923c332",
+      "name": "Send a text message",
+      "webhookId": "e192d493-2275-4f33-b3a9-dff16277728e",
+      "credentials": {
+        "telegramApi": {
+          "id": "cvleaP8scoJN3aaB",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        800,
+        -272
+      ],
+      "id": "52322ecb-74e4-42fb-bec7-edb53536ac7d",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bnZ5mcdT3JivbX5E",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $('Code in JavaScript').item.json.title }}",
+        "regionCode": "ID",
+        "categoryId": "28",
+        "options": {
+          "description": "={{ $('Code in JavaScript').item.json.description }}",
+          "privacyStatus": "unlisted",
+          "tags": "={{ $('Code in JavaScript').item.json.tags.join(',') }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -96
+      ],
+      "id": "68df0a84-8a6d-45e1-a1df-7c22d7dce25d",
+      "name": "Upload a video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "CoAdmBWyWpfDETux",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U",
+          "mode": "list",
+          "cachedResultName": "YouTube_Shorts_@mricky",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "YouTube URL": "=https://youtube.com/shorts/{{ $json.uploadId }}",
+            "Published At": "={{ $now.format('dd-MM-yyyy HH:mm') }} WIB\n",
+            "Status": "PUBLISH",
+            "Video Filename": "={{ $('Baca Line Content Youtube').item.json.row_number }}\n",
+            "row_number": "={{ $('Baca Line Content Youtube').item.json.row_number }}\n"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Video Filename",
+              "displayName": "Video Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "YouTube Title",
+              "displayName": "YouTube Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "YouTube URL",
+              "displayName": "YouTube URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Published At",
+              "displayName": "Published At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1152,
+        -272
+      ],
+      "id": "2adcab7e-5fd2-4da2-8d77-1e54f5ce616d",
+      "name": "Update row in sheet",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "75awslAmrwe7W9w3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5605239595",
+        "text": "==🚀 *YOUTUBE SHORTS RESMI TAYANG!*\n\n📌 *Judul:* {{ $('Code in JavaScript').item.json.title }}\n🔗 *Link Shorts:* https://youtube.com/shorts/{{ $('Upload a video').item.json.uploadId }}\n⏱️ *Waktu Rilis:* {{ $now.format('DD-MM-YYYY HH:mm') }} WIB\n\n📊 *Status Google Sheet:* Di-update ke PUBLISHED ✅\n🤖 *Engine:* Content Management & Publishing Engine\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        96
+      ],
+      "id": "ef1433e7-c865-4808-b502-406225101d3d",
+      "name": "Send a text message1",
+      "webhookId": "a066122b-4c38-46c1-aa74-e46646a3a529",
+      "credentials": {
+        "telegramApi": {
+          "id": "cvleaP8scoJN3aaB",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Baca Line Content Youtube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baca Line Content Youtube": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Find Video File in Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Video File in Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Cek File Ada di Drive?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cek File Ada di Drive?": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a video": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Baca Line Content Youtube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "KGI8TspVpy4Tj31v",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-21T04:42:17.075Z",
+      "updatedAt": "2026-10-21T04:42:17.075Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "6ef396c0-e130-41f0-91b9-701945baa287",
+    "workflowId": "KGI8TspVpy4Tj31v",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -224,
+          -96
+        ],
+        "id": "71481489-9b6f-4648-8ae4-05d14c610677",
+        "name": "When clicking ‘Execute workflow’"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.4,
+        "position": [
+          -224,
+          160
+        ],
+        "id": "29b8fa83-7cd4-4e6b-b6bb-b96da584967b",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U",
+            "mode": "list",
+            "cachedResultName": "YouTube_Shorts_@mricky",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKROTADrxodZY-AgfJtRF84NKRpXfMMivp1g9CE_n1U/edit#gid=0"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          0,
+          -96
+        ],
+        "id": "2a88c437-1c60-48b4-9f43-abf6bdfb7c4a",
+        "name": "Baca Line Content Youtube",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "75awslAmrwe7W9w3",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Ambil seluruh data baris dari Google Sheets\nconst items = $input.all();\n\n// 2. Filter baris yang kolom Status-nya 'READY'\nconst pending = items.filter(item => {\n  const status = item.json['Status'] || item.json['status'] || '';\n  return status.toString().trim().toUpperCase() === 'READY';\n});\n\n// 3. Jika tidak ada baris READY, berhenti aman\nif (pending.length === 0) {\n  return [];\n}\n\n// 4. Ambil 1 baris teratas yang READY\nconst target = pending[0].json;\n\n// 5. Ambil nama file MP4 di Drive\nconst filename = (target['Video Filename'] || target['video_file_name'] || target['Filename'] || '').trim();\n\n// 6. Siapkan Judul dengan hashtag #Shorts\nlet title = target['YouTube Title'] || target['youtube_title'] || target['Title'] || 'Otomasi Cerdas dengan n8n';\nif (!title.toLowerCase().includes('#shorts')) {\n  title = `${title} #Shorts`;\n}\n\n// 7. Siapkan Deskripsi & Tags\nconst defaultDescription = `Dari proses manual berhari-hari, dipangkas jadi hitungan detik menggunakan n8n & modern web ERP! ⚡\\n\\n📌 Fitur yang didemokan:\\n- Realtime multi-bank transaction ingestion\\n- 3-Way Auto-Match kliring instan\\n- Split matching & quick adjustment journal\\n- Export Berita Acara Rekonsiliasi resmi format PDF\\n\\n🎥 Tutorial arsitektur lengkapnya tonton di channel YouTube: @mrickyit\\n\\n#Shorts #n8n #ERP #AccountingAutomation #Fintech #Nextjs #Supabase`;\n\nconst description = target['Description'] || target['description'] || defaultDescription;\nconst rawTags = target['Tags'] || target['tags'] || '';\nconst tags = rawTags \n  ? rawTags.split(',').map(t => t.trim()) \n  : ['Shorts', 'n8n', 'ERP', 'Accounting', 'Fintech', 'Nextjs', 'Supabase', 'Automation', 'Ricky'];\n\n// 8. Kirim 1 item data siap pakai ke node selanjutnya\nreturn [{\n  json: {\n    video_file_name: filename,\n    title: title,\n    description: description,\n    tags: tags\n  }\n}];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          -96
+        ],
+        "id": "962a392c-12cc-444c-baeb-e66371a1a76a",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "resource": "fileFolder",
+          "queryString": "={{ $json.video_file_name }}",
+          "limit": 1,
+          "filter": {},
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          448,
+          -96
+        ],
+        "id": "06221dda-dd0d-445a-845d-7cc2dde75ef4",
+        "name": "Find Video File in Google Drive",
+        "alwaysOutputData": true,
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "bnZ5mcdT3JivbX5E",
+            "name": "Google Drive account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "b40873d0-5453-434d-a3da-cbf9ff112722",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          672,
+          -96
+        ],
+        "id": "a75926da-9fd4-45d6-9ce6-7f8bcd579f81",
+        "name": "Cek File Ada di Drive?"
+      },
+      {
+        "parameters": {
+          "chatId": "=5605239595",
+          "text": "==⚠️ *PERINGATAN GAGAL UPLOAD YOUTUBE SHORTS!*\n❌ *Penyebab:* File video tidak ditemukan di Google Drive!\n📁 *Nama File Dicari:* `{{ $('Code in JavaScript').item.json.video_file_name }}`\n📌 *Judul Konten:* {{ $('Code in JavaScript').item.json.title }}\n💡 *Solusi:*\n1. Pastikan file MP4 sudah di-drop ke folder *Antrian-Video-YouTube-Short*.\n2. Cek apakah ada typo/salah ketik nama file di Google Sheet.",
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          816,
+          96
+        ],
+        "id": "764b1dd1-c834-40b7-9873-50c03923c332",
+        "name": "Send a text message",
+        "webhookId": "e192d493-2275-4f33-b3a9-dff16277728e",
+        "credentials": {
+          "telegramApi": {
+            "id": "cvleaP8scoJN3aaB",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "download",
+          "fileId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          896,
+          -192
+        ],
+        "id": "52322ecb-74e4-42fb-bec7-edb53536ac7d",
+        "name": "Download file",
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "bnZ5mcdT3JivbX5E",
+            "name": "Google Drive account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "filters": {},
+          "options": {}
+        },
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1,
+        "position": [
+          1120,
+          -192
+        ],
+        "id": "68df0a84-8a6d-45e1-a1df-7c22d7dce25d",
+        "name": "Get many channels",
+        "credentials": {
+          "youTubeOAuth2Api": {
+            "id": "CoAdmBWyWpfDETux",
+            "name": "YouTube account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Baca Line Content Youtube",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Baca Line Content Youtube": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Find Video File in Google Drive",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Video File in Google Drive": {
+        "main": [
+          [
+            {
+              "node": "Cek File Ada di Drive?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cek File Ada di Drive?": {
+        "main": [
+          [
+            {
+              "node": "Download file",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Download file": {
+        "main": [
+          [
+            {
+              "node": "Get many channels",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Mohammad Ricky",
+    "name": "Version 6ef396c0",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-10-21T07:07:28.419Z",
+    "updatedAt": "2026-10-21T07:19:26.619Z"
+  }
+}
