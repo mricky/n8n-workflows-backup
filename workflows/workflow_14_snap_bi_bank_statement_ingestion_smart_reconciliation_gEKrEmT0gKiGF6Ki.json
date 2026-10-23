@@ -1,0 +1,194 @@
+{
+  "id": "gEKrEmT0gKiGF6Ki",
+  "name": "Workflow 14 - SNAP BI Bank Statement Ingestion & Smart Reconciliation",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-20T04:06:57.764Z",
+  "updatedAt": "2026-10-22T06:35:29.982Z",
+  "isArchived": false,
+  "versionId": "0e2e60cb-0451-4d5e-a76c-b0b2263910d8",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -96
+      ],
+      "id": "504fafbb-8dd0-4a70-92d1-ee19a7e7d583",
+      "name": "Simulate Bank Daily Ingestion"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:3000/sample_100_bank_mutations.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -416,
+        -96
+      ],
+      "id": "1f07190b-547b-4a10-80cc-5f78303b6c40",
+      "name": "Mock Bank Feed"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/webhook/bank-mutation",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -176,
+        -96
+      ],
+      "id": "f4aeb31c-876e-4cf8-bea3-7525d272fd55",
+      "name": "Send Batch to ERP Webhook"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -672,
+        160
+      ],
+      "id": "f0dce4bb-2abb-4a55-b8ff-d9730610b5a9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil seluruh data dari node Mock Bank Feed\nconst mutations = $('Mock Bank Feed').all().map(item => item.json);\n\nlet totalIn = 0;\nlet totalOut = 0;\nlet adminFeesCount = 0;\nlet invoiceCount = 0;\n\nfor (const m of mutations) {\n  const amt = Number(m.amount || 0);\n  if (m.mutation_type === 'CR') {\n    totalIn += amt;\n  } else {\n    totalOut += amt;\n  }\n\n  const desc = (m.description || '').toUpperCase();\n  if (desc.includes('BIAYA ADM') || desc.includes('BIAYA TRANSFER')) {\n    adminFeesCount++;\n  }\n  if (desc.includes('INV-')) {\n    invoiceCount++;\n  }\n}\n\n// Format Rupiah\nconst formatRupiah = (num) => 'Rp ' + num.toLocaleString('id-ID');\n\nreturn [{\n  json: {\n    total_mutasi: mutations.length,\n    total_masuk: formatRupiah(totalIn),\n    total_keluar: formatRupiah(totalOut),\n    biaya_admin: adminFeesCount,\n    invoice_terdeteksi: invoiceCount,\n    batch_time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',\n    batch_date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -96
+      ],
+      "id": "97931640-b24e-4f3a-b585-b4fab74f58f7",
+      "name": "Calculate Summary"
+    },
+    {
+      "parameters": {
+        "chatId": "5605239595",
+        "text": "=🏦 *[BANK RECONCILIATION LIVE ALERT]* ━━━━━━━━━━━━━━━━━━━━━━ 📅 *Tanggal:* {{ $json.batch_date }} ({{ $json.batch_time }}) 📊 *Total Mutasi Ditarik:* {{ $json.total_mutasi }} Transaksi 🟢 *Status:* Sukses Terintegrasi ke ERP  💰 *Ringkasan Arus Kas Masuk & Keluar:* • Total Uang Masuk: *{{ $json.total_masuk }}* • Total Uang Keluar: *{{ $json.total_keluar }}*  🔍 *Deteksi Cerdas Sistem:* • {{ $json.invoice_terdeteksi }} Transaksi terindikasi Invoice Mitra • {{ $json.biaya_admin }} Mutasi Biaya Admin Bank siap di-auto adjust  👉 *Buka Dashboard untuk Review & Approve:* http://localhost:3000 ━━━━━━━━━━━━━━━━━━━━━━ ⚡ _Powered by n8n x Nusantara ERP Engine_",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        -96
+      ],
+      "id": "5b2d8d76-7ed4-4e04-bed1-8adcebd80671",
+      "name": "Send a text message",
+      "webhookId": "0130313a-e831-459d-b8b3-b08221e58f11",
+      "credentials": {
+        "telegramApi": {
+          "id": "cvleaP8scoJN3aaB",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Simulate Bank Daily Ingestion": {
+      "main": [
+        [
+          {
+            "node": "Mock Bank Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Bank Feed": {
+      "main": [
+        [
+          {
+            "node": "Send Batch to ERP Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mock Bank Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Batch to ERP Webhook": {
+      "main": [
+        [
+          {
+            "node": "Calculate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Summary": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "gEKrEmT0gKiGF6Ki",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-10-20T04:06:57.764Z",
+      "updatedAt": "2026-10-20T04:06:57.764Z"
+    }
+  ],
+  "activeVersion": null
+}
