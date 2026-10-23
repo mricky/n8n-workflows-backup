@@ -4,9 +4,9 @@
   "active": true,
   "activeVersionId": "6ef396c0-e130-41f0-91b9-701945baa287",
   "createdAt": "2026-10-21T04:42:17.075Z",
-  "updatedAt": "2026-10-21T07:58:57.856Z",
+  "updatedAt": "2026-10-22T15:07:39.851Z",
   "isArchived": false,
-  "versionId": "5067a84e-3ac7-44ec-9da5-8a059abc66e5",
+  "versionId": "f4ba8e5d-7b53-4819-8406-1db8cb2770a8",
   "triggerCount": 1,
   "nodes": [
     {
@@ -75,7 +75,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 1. Ambil seluruh data baris dari Google Sheets\nconst items = $input.all();\n\n// 2. Filter baris yang kolom Status-nya 'READY'\nconst pending = items.filter(item => {\n  const status = item.json['Status'] || item.json['status'] || '';\n  return status.toString().trim().toUpperCase() === 'READY';\n});\n\n// 3. Jika tidak ada baris READY, berhenti aman\nif (pending.length === 0) {\n  return [];\n}\n\n// 4. Ambil 1 baris teratas yang READY\nconst target = pending[0].json;\n\n// 5. Ambil nama file MP4 di Drive\nconst filename = (target['Video Filename'] || target['video_file_name'] || target['Filename'] || '').trim();\n\n// 6. Siapkan Judul dengan hashtag #Shorts\nlet title = target['YouTube Title'] || target['youtube_title'] || target['Title'] || 'Otomasi Cerdas dengan n8n';\nif (!title.toLowerCase().includes('#shorts')) {\n  title = `${title} #Shorts`;\n}\n\n// 7. Siapkan Deskripsi & Tags\nconst defaultDescription = `Dari proses manual berhari-hari, dipangkas jadi hitungan detik menggunakan n8n & modern web ERP! ⚡\\n\\n📌 Fitur yang didemokan:\\n- Realtime multi-bank transaction ingestion\\n- 3-Way Auto-Match kliring instan\\n- Split matching & quick adjustment journal\\n- Export Berita Acara Rekonsiliasi resmi format PDF\\n\\n🎥 Tutorial arsitektur lengkapnya tonton di channel YouTube: @mrickyit\\n\\n#Shorts #n8n #ERP #AccountingAutomation #Fintech #Nextjs #Supabase`;\n\nconst description = target['Description'] || target['description'] || defaultDescription;\nconst rawTags = target['Tags'] || target['tags'] || '';\nconst tags = rawTags \n  ? rawTags.split(',').map(t => t.trim()) \n  : ['Shorts', 'n8n', 'ERP', 'Accounting', 'Fintech', 'Nextjs', 'Supabase', 'Automation', 'Ricky'];\n\n// 8. Kirim 1 item data siap pakai ke node selanjutnya\nreturn [{\n  json: {\n    video_file_name: filename,\n    title: title,\n    description: description,\n    tags: tags\n  }\n}];\n"
+        "jsCode": "// 1. Ambil seluruh data baris dari Google Sheets\nconst items = $input.all();\n\n// 2. Filter hanya baris yang kolom Status-nya 'READY'\nconst pending = items.filter(item => {\n  const status = item.json['Status'] || item.json['status'] || '';\n  return String(status).trim().toUpperCase() === 'READY';\n});\n\n// 3. Jika tidak ada baris yang READY, berhenti dengan aman\nif (pending.length === 0) {\n  return [];\n}\n\n// 4. Ambil 1 baris teratas yang siap diproses\nconst target = pending[0].json;\n\n// 5. Normalisasi nama file video (otomatis tambahkan .mp4 jika belum ada)\nconst rawFilename = target['Video Filename'] ?? target['video_file_name'] ?? target['Filename'] ?? '';\nlet filename = String(rawFilename).trim();\nif (filename && !filename.toLowerCase().endsWith('.mp4')) {\n  filename = `${filename}.mp4`;\n}\n\n// 6. Siapkan Judul dengan hashtag #Shorts\nlet rawTitle = target['YouTube Title'] ?? target['youtube_title'] ?? target['Title'] ?? 'Otomasi Cerdas dengan n8n';\nlet title = String(rawTitle).trim();\nif (!title.toLowerCase().includes('#shorts')) {\n  title = `${title} #Shorts`;\n}\n\n// 7. Siapkan Deskripsi & Tags\nconst defaultDescription = `Dari proses manual berhari-hari, dipangkas jadi hitungan detik menggunakan n8n & modern web ERP! ⚡\\n\\n📌 Fitur yang didemokan:\\n- Realtime multi-bank transaction ingestion\\n- 3-Way Auto-Match kliring instan\\n- Split matching & quick adjustment journal\\n- Export Berita Acara Rekonsiliasi resmi format PDF\\n\\n🎥 Tutorial arsitektur lengkapnya tonton di channel YouTube: @mrickyit\\n\\n#Shorts #n8n #ERP #AccountingAutomation #Fintech #Nextjs #Supabase`;\n\nconst rawDesc = target['Description'] ?? target['description'] ?? defaultDescription;\nconst description = String(rawDesc).trim();\n\nconst rawTags = String(target['Tags'] ?? target['tags'] ?? '').trim();\nconst tags = rawTags \n  ? rawTags.split(',').map(t => t.trim()).filter(Boolean) \n  : ['Shorts', 'n8n', 'ERP', 'Accounting', 'Fintech', 'Nextjs', 'Supabase', 'Automation', 'Ricky'];\n\n// 8. Kirim data siap pakai (row_number terjamin ikut ke node berikutnya)\nreturn [{\n  json: {\n    row_number: target['row_number'] || target.row_number || null,\n    video_file_name: filename,\n    title: title,\n    description: description,\n    tags: tags\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -242,7 +242,6 @@
             "YouTube URL": "=https://youtube.com/shorts/{{ $json.uploadId }}",
             "Published At": "={{ $now.format('dd-MM-yyyy HH:mm') }} WIB\n",
             "Status": "PUBLISH",
-            "Video Filename": "={{ $('Baca Line Content Youtube').item.json.row_number }}\n",
             "row_number": "={{ $('Baca Line Content Youtube').item.json.row_number }}\n"
           },
           "matchingColumns": [
@@ -257,7 +256,7 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true,
-              "removed": false
+              "removed": true
             },
             {
               "id": "YouTube Title",
