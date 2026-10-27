@@ -4,7 +4,7 @@
   "active": false,
   "activeVersionId": null,
   "createdAt": "2026-10-09T07:00:22.905Z",
-  "updatedAt": "2026-10-21T02:09:08.222Z",
+  "updatedAt": "2026-10-26T01:22:53.353Z",
   "isArchived": false,
   "versionId": "1251fccb-0f84-4141-9dc7-86db6114af14",
   "triggerCount": 0,
@@ -432,7 +432,24 @@
     "binaryMode": "separate"
   },
   "staticData": null,
-  "pinData": {},
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Nama & Jabatan PIC": "Dadang",
+          "Nama Perusahaan": "PT Alim Rugi",
+          "Email / WhatsApp PIC": "dadang@gmail.com",
+          "Kebutuhan Armada & Volume Bulanan": "> 50 Ritase/Bulan (Tronton/Wingbox)",
+          "Rute & Jenis Muatan": "Tanjung Priuk - Factory",
+          "submittedAt": "2026-10-20T22:09:02.302-04:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
