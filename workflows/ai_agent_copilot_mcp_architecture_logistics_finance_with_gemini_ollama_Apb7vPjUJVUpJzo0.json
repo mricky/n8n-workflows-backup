@@ -1,0 +1,210 @@
+{
+  "id": "Apb7vPjUJVUpJzo0",
+  "name": "AI Agent Copilot (MCP Architecture): Logistics & Finance with Gemini & Ollama",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-11-04T03:43:27.279Z",
+  "updatedAt": "2026-11-04T04:31:03.966Z",
+  "isArchived": false,
+  "versionId": "d44a68ec-d346-428a-aaa4-5a7338939b59",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -944,
+        -32
+      ],
+      "id": "fa2cdb56-6f47-42b1-80cb-dd4af6e93fb1",
+      "name": "Chat Trigger (Customer / Dispatcher / Manager)",
+      "webhookId": "e4d2b941-c5b0-497a-afd3-7bcda7171c85"
+    },
+    {
+      "parameters": {
+        "agent": "reActAgent",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -304,
+        -32
+      ],
+      "id": "688db013-8b84-4d1d-b44f-5b68f53678d3",
+      "name": "MCP AI Agent Engine"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        128
+      ],
+      "id": "8e5599cb-65ba-4d9b-b96c-a9bfc901c4bd",
+      "name": "Pilihan A: Google Gemini 1.5 Flash (Cloud)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LbGqYGsX4XH35zyS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "track_shipment_mcp",
+        "description": "Lacak detail status kargo pengiriman, lokasi hub transit, berat barang, dan status pecah belah berdasarkan nomor resi AWB (contoh: KRG-JKT-1001 atau KRG-JKT-1002).",
+        "jsCode": "// Ambil input dari ReAct Agent\nlet text = '';\ntry {\n  if (typeof query !== 'undefined') text = query;\n  else if (typeof input !== 'undefined') text = typeof input === 'object' ? JSON.stringify(input) : String(input);\n} catch (e) {}\n\nconst shipments = {\n  'KRG-JKT-1001': 'Resi: KRG-JKT-1001 | Pengirim: PT Sumber Berkah | Tujuan: Semarang | Status: IN_TRANSIT di Hub Cikarang | Berat: 450.5 kg (PECAH BELAH / FRAGILE)',\n  'KRG-JKT-1002': 'Resi: KRG-JKT-1002 | Pengirim: CV Maju Jaya | Tujuan: Surabaya | Status: DELAYED di Hub Cirebon | Berat: 1200 kg',\n  'KRG-JKT-1003': 'Resi: KRG-JKT-1003 | Pengirim: Budi Santoso | Tujuan: Bandung | Status: DELIVERED di Hub Bandung | Berat: 15 kg'\n};\n\ntext = String(text).toUpperCase();\nfor (const key of Object.keys(shipments)) {\n  if (text.includes(key)) {\n    return shipments[key];\n  }\n}\n\nreturn 'Resi KRG-JKT-1001: Status IN_TRANSIT di Hub Cikarang menuju Semarang (Barang Pecah Belah).';\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        176
+      ],
+      "id": "f0e50a12-02ac-4f7a-972f-77e297e2dace",
+      "name": "MCP Tool: track_shipment"
+    },
+    {
+      "parameters": {
+        "name": "check_fleet_incident_mcp",
+        "description": "Ambil laporan armada truk kargo yang sedang mengalami kendala mogok, ban bocor, atau macet di perjalanan.",
+        "jsCode": "const incidents = [\n  {\n    plat_nomor: 'B-9844-KRG',\n    driver: 'Pak Hendra',\n    rute: 'Jakarta - Surabaya',\n    kecepatan: '0 km/jam',\n    status: 'Ban belakang bocor di Rest Area KM 228 (arah Surabaya)'\n  }\n];\n\nreturn JSON.stringify({\n  total_kendala: incidents.length,\n  laporan_armada: incidents\n});"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
+      "position": [
+        288,
+        192
+      ],
+      "id": "3a195750-4fc4-4496-afb6-8357515c9da1",
+      "name": "MCP Tool: check_fleet_incidents"
+    },
+    {
+      "parameters": {
+        "name": "get_unpaid_invoices_mcp",
+        "description": "Ambil daftar seluruh faktur tagihan vendor yang belum lunas (UNPAID atau WAITING_APPROVAL) beserta tanggal jatuh tempo dan nominalnya.",
+        "jsCode": "const unpaid = [\n  { invoice_number: 'INV-2026-001', vendor: 'PT Pertamina Patra Niaga', amount_idr: 75000000, due_date: '2026-11-06', status: 'UNPAID' },\n  { invoice_number: 'INV-2026-002', vendor: 'Bengkel Truk Sahabat', amount_idr: 14500000, due_date: '2026-11-10', status: 'WAITING_APPROVAL' }\n];\n\nconst totalNominal = unpaid.reduce((sum, item) => sum + item.amount_idr, 0);\n\nreturn JSON.stringify({\n  jumlah_tagihan: unpaid.length,\n  total_nominal_idr: totalNominal,\n  daftar_faktur: unpaid\n});"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
+      "position": [
+        64,
+        176
+      ],
+      "id": "c9111cee-a6e2-4c10-9293-8497f47085a7",
+      "name": "MCP Tool: get_unpaid_invoices"
+    },
+    {
+      "parameters": {
+        "name": "check_bank_balance_mcp",
+        "description": "Periksa saldo rekening bank operasional perusahaan dan validasi apakah uang mencukupi untuk melakukan pembayaran tertentu.",
+        "jsCode": "const required = Number($fromAI('required_amount', 'Nominal dana yang dibutuhkan untuk bayar, contoh 75000000') || 0);\nconst account = ($fromAI('account_name', 'Nama rekening bank, contoh Mandiri Operasional') || 'Mandiri Operasional').trim();\n\nconst balances = {\n  'Mandiri Operasional': 185000000,\n  'BCA Cadangan Pajak': 60000000\n};\n\nconst currentBalance = balances[account] || 0;\nconst isEnough = currentBalance >= required;\n\nreturn JSON.stringify({\n  rekening: account,\n  saldo_saat_ini: currentBalance,\n  dana_dibutuhkan: required,\n  apakah_cukup: isEnough,\n  sisa_saldo_setelah_bayar: currentBalance - required\n});"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
+      "position": [
+        512,
+        176
+      ],
+      "id": "d4a3a099-69f1-4ed1-8ae3-5d3ca423480e",
+      "name": "MCP Tool: check_bank_balance"
+    }
+  ],
+  "connections": {
+    "Chat Trigger (Customer / Dispatcher / Manager)": {
+      "main": [
+        [
+          {
+            "node": "MCP AI Agent Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pilihan A: Google Gemini 1.5 Flash (Cloud)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "MCP AI Agent Engine",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Tool: track_shipment": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP AI Agent Engine",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Tool: check_fleet_incidents": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP AI Agent Engine",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Tool: get_unpaid_invoices": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP AI Agent Engine",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Tool: check_bank_balance": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP AI Agent Engine",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Apb7vPjUJVUpJzo0",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-11-04T03:43:27.279Z",
+      "updatedAt": "2026-11-04T03:43:27.279Z"
+    }
+  ],
+  "activeVersion": null
+}
