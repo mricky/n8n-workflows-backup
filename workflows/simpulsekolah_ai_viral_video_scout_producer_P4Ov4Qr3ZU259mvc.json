@@ -1,0 +1,95 @@
+{
+  "id": "P4Ov4Qr3ZU259mvc",
+  "name": "SimpulSekolah - AI Viral Video Scout & Producer",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-11-06T05:14:29.523Z",
+  "updatedAt": "2026-11-06T05:14:29.523Z",
+  "isArchived": false,
+  "versionId": "2cb4d7da-e3a1-403e-b0f1-af3bb222f2f9",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Daily Scout 07:00 WIB",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "d4d1984b-81d7-4ccd-97e6-5ba2886e9150"
+    },
+    {
+      "parameters": {
+        "command": "python3 scripts/video_generator/viral_video_hunter.py"
+      },
+      "name": "Execute AI Viral Scout",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -64
+      ],
+      "id": "4106cd6f-5b17-4d35-9618-8721d598230a"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "produce-video",
+        "options": {}
+      },
+      "name": "Webhook On-Demand Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        144
+      ],
+      "id": "226531a6-5cbe-4863-ae96-d4f600ca22bb",
+      "webhookId": "514788e2-b28e-45be-879f-2b332f98a501"
+    },
+    {
+      "parameters": {
+        "command": "python3 scripts/video_generator/generate_shorts.py --url \"{{ $json.body.url }}\""
+      },
+      "name": "Execute Video Producer Engine",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        48,
+        144
+      ],
+      "id": "e3d95fb0-5bf3-4013-941f-a353a83daf68"
+    }
+  ],
+  "connections": {},
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "P4Ov4Qr3ZU259mvc",
+      "projectId": "Nv0SUK5NpTgmUBdj",
+      "createdAt": "2026-11-06T05:14:29.523Z",
+      "updatedAt": "2026-11-06T05:14:29.523Z"
+    }
+  ],
+  "activeVersion": null
+}
