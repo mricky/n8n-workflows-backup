@@ -4,9 +4,9 @@
   "active": false,
   "activeVersionId": null,
   "createdAt": "2026-11-04T03:43:27.279Z",
-  "updatedAt": "2026-11-04T04:31:03.966Z",
+  "updatedAt": "2026-11-05T15:43:37.389Z",
   "isArchived": false,
-  "versionId": "d44a68ec-d346-428a-aaa4-5a7338939b59",
+  "versionId": "a40fbadd-ebd5-4f08-9545-2e6ad1a3342a",
   "triggerCount": 0,
   "nodes": [
     {
@@ -16,8 +16,8 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
       "position": [
-        -944,
-        -32
+        -720,
+        -16
       ],
       "id": "fa2cdb56-6f47-42b1-80cb-dd4af6e93fb1",
       "name": "Chat Trigger (Customer / Dispatcher / Manager)",
@@ -48,7 +48,7 @@
       "typeVersion": 1,
       "position": [
         -496,
-        128
+        192
       ],
       "id": "8e5599cb-65ba-4d9b-b96c-a9bfc901c4bd",
       "name": "Pilihan A: Google Gemini 1.5 Flash (Cloud)",
@@ -69,7 +69,7 @@
       "typeVersion": 1,
       "position": [
         -160,
-        176
+        208
       ],
       "id": "f0e50a12-02ac-4f7a-972f-77e297e2dace",
       "name": "MCP Tool: track_shipment"
@@ -84,7 +84,7 @@
       "typeVersion": 1,
       "position": [
         288,
-        192
+        224
       ],
       "id": "3a195750-4fc4-4496-afb6-8357515c9da1",
       "name": "MCP Tool: check_fleet_incidents"
@@ -99,7 +99,7 @@
       "typeVersion": 1,
       "position": [
         64,
-        176
+        208
       ],
       "id": "c9111cee-a6e2-4c10-9293-8497f47085a7",
       "name": "MCP Tool: get_unpaid_invoices"
@@ -113,8 +113,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1,
       "position": [
-        512,
-        176
+        496,
+        224
       ],
       "id": "d4a3a099-69f1-4ed1-8ae3-5d3ca423480e",
       "name": "MCP Tool: check_bank_balance"
