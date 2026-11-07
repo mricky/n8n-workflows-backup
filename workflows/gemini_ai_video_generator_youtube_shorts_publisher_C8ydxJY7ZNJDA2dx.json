@@ -4,47 +4,24 @@
   "active": false,
   "activeVersionId": null,
   "createdAt": "2026-11-04T14:48:37.055Z",
-  "updatedAt": "2026-11-05T02:36:26.900Z",
+  "updatedAt": "2026-11-06T01:40:08.296Z",
   "isArchived": false,
-  "versionId": "b8fce8b6-808e-4d65-9c37-7f6d7b7c51ed",
+  "versionId": "dd84cd9d-9a4a-4ab7-a3ed-0c07b4ec5950",
   "triggerCount": 1,
   "nodes": [
     {
-      "parameters": {
-        "options": {}
-      },
+      "parameters": {},
       "id": "trigger-manual-input",
       "name": "1a. Trigger Manual Input",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -500,
+        -496,
         160
       ]
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 1,11 * * *"
-            }
-          ]
-        }
-      },
-      "id": "trigger-schedule-daily",
-      "name": "1b. Jadwal Otomatis 2x Sehari (08:00 & 18:00 WIB)",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -500,
-        340
-      ]
-    },
-    {
-      "parameters": {
-        "method": "GET",
         "url": "http://host.docker.internal:8000/calendar/next-topic",
         "options": {}
       },
@@ -53,7 +30,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -280,
+        -288,
         240
       ]
     },
@@ -85,14 +62,15 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"qwen2.5-coder:7b\",\n  \"prompt\": \"Kamu adalah AI Video Director kelas dunia pembuat naskah video YouTube Shorts vertikal (9:16) yang SANGAT DINAMIS, MEMIKAT, dan DIARAHKAN PER SCENE.\\n\\nTopik: {{ $json.topik }}\\nTarget CTA: {{ $json.target_cta }}\\nAudiens: {{ $json.target_audience }}\\nKata Kunci Komen: {{ $json.lead_magnet_keyword }}\\n\\nATURAN MATEMATIKA DURASI (WAJIB 40 - 45 DETIK):\\n- Narasi suara AI (Edge-TTS Bahasa Indonesia) membaca rata-rata 2.5 kata per detik.\\n- AGAR DURASI VIDEO TEPAT 42 - 45 DETIK, TOTAL KATA DALAM 'full_voiceover_script' WAJIB BERKISAR 105 SAMPAI 120 KATA!\\n- DILARANG KERAS MEMBUAT NASKAH PENDEK (di bawah 100 kata)!\\n\\nCONTOH NASKAH IDEAL DENGAN PANJANG 110 KATA:\\n\\\"Tahukah Anda bahwa banyak bisnis boncos jutaan rupiah setiap bulan hanya untuk bayar software otomatisasi seperti Zapier atau Make? Padahal di era sekarang, Anda bisa membangun alur otomatisasi yang jauh lebih canggih tanpa biaya langganan sepeserpun! Caranya adalah dengan memasang n8n di komputer atau server pribadi Anda sendiri. Dengan n8n, Anda bisa menghubungkan WhatsApp, Google Sheets, dan database lokal tanpa batas kuota alur kerja dan tanpa bayar bulanan. Semua data operasional bisnis Anda tetap aman di internal dan tidak bocor ke pihak luar. Komen {{ $json.lead_magnet_keyword }} di bawah sekarang juga, saya akan kirimkan file JSON workflow dan panduan instalasi lengkapnya ke inbox Anda secara gratis! Like dan subscribe sekarang!\\\"\\n\\nKEMBALIKAN HANYA JSON DENGAN STRUKTUR BERIKUT (TANPA MARKDOWN TICKS):\\n{\\n  \\\"title\\\": \\\"Judul Shorts Clicky Maksimal 50 Karakter #Shorts\\\",\\n  \\\"description\\\": \\\"Deskripsi SEO + hashtag #Shorts\\\",\\n  \\\"full_voiceover_script\\\": \\\"Naskah lengkap 105-120 kata yang mengalir lancar dari awal sampai penutup...\\\",\\n  \\\"scenes\\\": [\\n    {\\n      \\\"scene_number\\\": 1,\\n      \\\"duration_seconds\\\": 8,\\n      \\\"broll_search_keyword\\\": \\\"{{ $json.broll_search_keyword }}\\\",\\n      \\\"on_screen_text\\\": \\\"HOOK TEKS 3-5 KATA\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat narasi scene 1...\\\"\\n    },\\n    {\\n      \\\"scene_number\\\": 2,\\n      \\\"duration_seconds\\\": 12,\\n      \\\"broll_search_keyword\\\": \\\"technology abstract dark\\\",\\n      \\\"on_screen_text\\\": \\\"POIN MASALAH 3-5 KATA\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat narasi scene 2...\\\"\\n    },\\n    {\\n      \\\"scene_number\\\": 3,\\n      \\\"duration_seconds\\\": 15,\\n      \\\"broll_search_keyword\\\": \\\"automation software nodes\\\",\\n      \\\"on_screen_text\\\": \\\"INTI SOLUSI 3-5 KATA\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat narasi scene 3...\\\"\\n    },\\n    {\\n      \\\"scene_number\\\": 4,\\n      \\\"duration_seconds\\\": 9,\\n      \\\"broll_search_keyword\\\": \\\"subscribe like channel cta\\\",\\n      \\\"on_screen_text\\\": \\\"Komen {{ $json.lead_magnet_keyword }} Sekarang\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat ajakan komen {{ $json.lead_magnet_keyword }} dan Like dan subscribe sekarang...\\\"\\n    }\\n  ]\\n}\",\n  \"stream\": false,\n  \"format\": \"json\"\n}"
+        "jsonBody": "={\n  \"model\": \"qwen2.5-coder:7b\",\n  \"prompt\": \"Kamu adalah AI Video Director kelas dunia pembuat naskah video YouTube Shorts vertikal (9:16) yang SANGAT DINAMIS, MEMIKAT, dan DIARAHKAN PER SCENE.\\n\\nTopik: {{ $json.topik }}\\nTarget CTA: {{ $json.target_cta }}\\nAudiens: {{ $json.target_audience }}\\nKata Kunci Komen: {{ $json.lead_magnet_keyword }}\\n\\nATURAN MATEMATIKA DURASI (WAJIB 40 - 45 DETIK):\\n- Narasi suara AI (Edge-TTS Bahasa Indonesia) membaca rata-rata 2.5 kata per detik.\\n- AGAR DURASI VIDEO TEPAT 42 - 45 DETIK, TOTAL KATA DALAM 'full_voiceover_script' WAJIB BERKISAR 105 SAMPAI 120 KATA!\\n- DILARANG KERAS MEMBUAT NASKAH PENDEK (di bawah 100 kata)!\\n\\nCONTOH NASKAH IDEAL DENGAN PANJANG 110 KATA:\\n\\\"Tahukah Anda bahwa banyak bisnis boncos jutaan rupiah setiap bulan hanya untuk bayar software otomatisasi seperti Zapier atau Make? Padahal di era sekarang, Anda bisa membangun alur otomatisasi yang jauh lebih canggih tanpa biaya langganan sepeserpun! Caranya adalah dengan memasang n8n di komputer atau server pribadi Anda sendiri. Dengan n8n, Anda bisa menghubungkan WhatsApp, Google Sheets, dan database lokal tanpa batas kuota alur kerja dan tanpa bayar bulanan. Semua data operasional bisnis Anda tetap aman di internal dan tidak bocor ke pihak luar. Komen {{ $json.lead_magnet_keyword }} di bawah sekarang juga, saya akan kirimkan file JSON workflow dan panduan instalasi lengkapnya ke inbox Anda secara gratis! Like dan subscribe sekarang!\\\"\\n\\nKEMBALIKAN HANYA JSON DENGAN STRUKTUR BERIKUT (TANPA MARKDOWN TICKS):\\n{\\n  \\\"title\\\": \\\"Judul Shorts Clicky Maksimal 50 Karakter #Shorts\\\",\\n  \\\"description\\\": \\\"Deskripsi SEO + hashtag #Shorts\\\",\\n  \\\"full_voiceover_script\\\": \\\"Naskah lengkap 105-120 kata yang mengalir lancar dari awal sampai penutup...\\\",\\n  \\\"scenes\\\": [\\n    {\\n      \\\"scene_number\\\": 1,\\n      \\\"duration_seconds\\\": 8,\\n      \\\"broll_search_keyword\\\": \\\"{{ $json.broll_search_keyword }}\\\",\\n      \\\"on_screen_text\\\": \\\"HOOK TEKS 3-5 KATA\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat narasi scene 1...\\\"\\n    },\\n    {\\n      \\\"scene_number\\\": 2,\\n      \\\"duration_seconds\\\": 12,\\n      \\\"broll_search_keyword\\\": \\\"technology abstract dark\\\",\\n      \\\"on_screen_text\\\": \\\"POIN MASALAH 3-5 KATA\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat narasi scene 2...\\\"\\n    },\\n    {\\n      \\\"scene_number\\\": 3,\\n      \\\"duration_seconds\\\": 15,\\n      \\\"broll_search_keyword\\\": \\\"automation software nodes\\\",\\n      \\\"on_screen_text\\\": \\\"INTI SOLUSI 3-5 KATA\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat narasi scene 3...\\\"\\n    },\\n    {\\n      \\\"scene_number\\\": 4,\\n      \\\"duration_seconds\\\": 9,\\n      \\\"broll_search_keyword\\\": \\\"subscribe like channel cta\\\",\\n      \\\"on_screen_text\\\": \\\"Komen {{ $json.lead_magnet_keyword }} Sekarang\\\",\\n      \\\"narration_chunk\\\": \\\"Kalimat ajakan komen {{ $json.lead_magnet_keyword }} dan Like dan subscribe sekarang...\\\"\\n    }\\n  ]\\n}\",\n  \"stream\": false,\n  \"format\": \"json\"\n}",
+        "options": {}
       },
       "id": "http-ollama-director",
       "name": "3. AI Video Director (Ollama Lokal qwen2.5-coder)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        140,
+        144,
         240
       ]
     },
@@ -105,7 +83,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        360,
+        368,
         240
       ]
     },
@@ -118,7 +96,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
+        592,
         240
       ]
     },
@@ -128,7 +106,8 @@
         "url": "http://host.docker.internal:8000/render-video",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  title: $json.video_title,\n  script: $json.voiceover_script,\n  scenes: $json.scenes,\n  voice: $json.voice || undefined\n}) }}"
+        "jsonBody": "={{ JSON.stringify({\n  title: $json.video_title,\n  script: $json.voiceover_script,\n  scenes: $json.scenes,\n  voice: $json.voice || undefined\n}) }}",
+        "options": {}
       },
       "id": "http-render-engine",
       "name": "6. Panggil Python Video Renderer (FFmpeg + Edge-TTS)",
@@ -145,14 +124,15 @@
         "url": "http://host.docker.internal:8000/calendar/complete-topic",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  id: $('5. Persiapkan Aset Visual & B-Roll').first().json.slot_id,\n  day: $('5. Persiapkan Aset Visual & B-Roll').first().json.day,\n  slot: $('5. Persiapkan Aset Visual & B-Roll').first().json.slot,\n  video_path: $json.video_path,\n  video_filename: $json.video_filename\n}) }}"
+        "jsonBody": "={{ JSON.stringify({\n  id: $('5. Persiapkan Aset Visual & B-Roll').first().json.slot_id,\n  day: $('5. Persiapkan Aset Visual & B-Roll').first().json.day,\n  slot: $('5. Persiapkan Aset Visual & B-Roll').first().json.slot,\n  video_path: $json.video_path,\n  video_filename: $json.video_filename\n}) }}",
+        "options": {}
       },
       "id": "http-mark-calendar-completed",
       "name": "7. Tandai Kalender: SELESAI (Anti-Duplikasi)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1020,
+        1024,
         240
       ]
     },
@@ -165,13 +145,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1240,
+        1248,
         240
       ]
     },
     {
       "parameters": {
-        "method": "GET",
         "url": "=http://host.docker.internal:8000/videos/{{ $json.file_mp4 }}",
         "options": {
           "response": {
@@ -186,7 +165,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1460,
+        1472,
         240
       ]
     },
@@ -204,76 +183,9 @@
       "typeVersion": 1.2,
       "position": [
         1680,
-        140
+        144
       ],
-      "credentials": {
-        "telegramApi": {
-          "id": "cvleaP8scoJN3aaB",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "video",
-        "operation": "upload",
-        "title": "={{ $('8. Ringkasan & File Video Siap Upload').item.json.judul_youtube }}",
-        "categoryId": "28",
-        "binaryProperty": "data",
-        "options": {
-          "description": "={{ $('8. Ringkasan & File Video Siap Upload').item.json.deskripsi_seo }}",
-          "privacyStatus": "public",
-          "tags": "=Shorts,n8n,Otomasi,Bisnis,Freelancer,AI,{{ $('8. Ringkasan & File Video Siap Upload').item.json.kata_kunci_komen }}"
-        }
-      },
-      "id": "youtube-upload-shorts",
-      "name": "10. Upload Otomatis ke YouTube Shorts (Public)",
-      "type": "n8n-nodes-base.youTube",
-      "typeVersion": 1,
-      "position": [
-        1680,
-        340
-      ],
-      "credentials": {
-        "youTubeOAuth2Api": {
-          "id": "CoAdmBWyWpfDETux",
-          "name": "YouTube account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:8000/calendar/complete-topic",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  id: $('5. Persiapkan Aset Visual & B-Roll').first().json.slot_id,\n  day: $('5. Persiapkan Aset Visual & B-Roll').first().json.day,\n  slot: $('5. Persiapkan Aset Visual & B-Roll').first().json.slot,\n  youtube_id: $json.id,\n  published: true\n}) }}"
-      },
-      "id": "http-lock-published-topic",
-      "name": "11. Kunci Status Kalender: TERBIT PUBLIK (Anti-Duplikasi)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1900,
-        340
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "5605239595",
-        "text": "=🚀 *VIDEO SHORTS RESMI PUBLIK DI YOUTUBE!*\n\n📌 *Judul:* {{ $('8. Ringkasan & File Video Siap Upload').item.json.judul_youtube }}\n🔗 *Link YouTube:* https://www.youtube.com/shorts/{{ $('10. Upload Otomatis ke YouTube Shorts (Public)').item.json.id }}\n👁️ *Status Privasi:* PUBLIC\n🏷️ *Lead Magnet Keyword:* {{ $('8. Ringkasan & File Video Siap Upload').item.json.kata_kunci_komen }}\n🛡️ *Anti-Duplikasi:* Terkunci permanen di Kalender Konten (Slot tidak akan pernah diulang)!",
-        "additionalFields": {
-          "parse_mode": "Markdown"
-        }
-      },
-      "id": "telegram-notify-published",
-      "name": "12. Notifikasi Sukses Publik ke Telegram",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        2120,
-        340
-      ],
+      "webhookId": "e62b961d-7ff8-4b8a-92d3-553f874f334c",
       "credentials": {
         "telegramApi": {
           "id": "cvleaP8scoJN3aaB",
@@ -284,17 +196,6 @@
   ],
   "connections": {
     "1a. Trigger Manual Input": {
-      "main": [
-        [
-          {
-            "node": "2. Ambil Topik Kalender (Anti-Duplikasi)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "1b. Jadwal Otomatis 2x Sehari (08:00 & 18:00 WIB)": {
       "main": [
         [
           {
@@ -400,33 +301,6 @@
             "node": "9. Kirim Alert & Preview ke Telegram",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "10. Upload Otomatis ke YouTube Shorts (Public)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "10. Upload Otomatis ke YouTube Shorts (Public)": {
-      "main": [
-        [
-          {
-            "node": "11. Kunci Status Kalender: TERBIT PUBLIK (Anti-Duplikasi)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "11. Kunci Status Kalender: TERBIT PUBLIK (Anti-Duplikasi)": {
-      "main": [
-        [
-          {
-            "node": "12. Notifikasi Sukses Publik ke Telegram",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -434,7 +308,8 @@
   },
   "nodeGroups": [],
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "staticData": {
     "node:1b. Jadwal Otomatis 2x Sehari (08:00 & 18:00 WIB)": {
